@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>Training Log</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#12161c;
+    --panel:#1a2029;
+    --panel-2:#212938;
+    --border:#2a3240;
+    --text:#edede6;
+    --text-muted:#8891a0;
+    --gold:#e8a33d;
+    --gold-dim:#e8a33d33;
+    --teal:#4fb3a8;
+    --teal-dim:#4fb3a833;
+    --rose:#d98fa3;
+    --rose-dim:#d98fa333;
+    --good:#6fcf97;
+    --bad:#e0798a;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;}
+  html,body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Inter',sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,.display{
+    font-family:'Oswald',sans-serif;
+    text-transform:uppercase;
+    letter-spacing:0.03em;
+    margin:0;
+  }
+  .mono{font-family:'JetBrains Mono',monospace;}
+  #app{max-width:520px;margin:0 auto;padding:16px 14px 60px;}
+
+  .eyebrow{
+    font-family:'Oswald',sans-serif;
+    font-size:11px;
+    letter-spacing:0.22em;
+    color:var(--text-muted);
+    text-transform:uppercase;
+    margin-bottom:4px;
+  }
+  .app-title{font-size:26px;font-weight:600;color:var(--text);margin-bottom:4px;}
+  .account-line{font-size:11.5px;color:var(--text-muted);margin-bottom:16px;}
+  .account-line a{color:var(--gold);cursor:pointer;text-decoration:none;}
+
+  /* ---------- Bibs ---------- */
+  .bibs{display:flex;gap:10px;margin-bottom:12px;}
+  .bib{
+    flex:1;position:relative;background:var(--panel);border:2px dashed var(--border);
+    border-radius:10px;padding:14px 10px;text-align:center;overflow:hidden;
+  }
+  .bib::before,.bib::after{
+    content:'';position:absolute;top:6px;width:7px;height:7px;border-radius:50%;
+    background:var(--bg);border:1.5px solid var(--border);
+  }
+  .bib::before{left:6px;}
+  .bib::after{right:6px;}
+  .bib-teal{border-color:#2f5a55;}
+  .bib-rose{border-color:#5a3d45;}
+  .bib-label{font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:0.15em;color:var(--text-muted);text-transform:uppercase;margin-bottom:4px;}
+  .bib-number{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:34px;line-height:1;}
+  .bib-teal .bib-number{color:var(--teal);}
+  .bib-rose .bib-number{color:var(--rose);}
+  .bib-sub{font-size:10px;color:var(--text-muted);margin-top:4px;}
+
+  .phase-banner{
+    background:var(--gold-dim);border:1px solid #6b4f22;color:var(--gold);border-radius:10px;
+    padding:8px 12px;font-size:12.5px;margin-bottom:10px;font-weight:500;
+  }
+  .stat-row{display:flex;gap:8px;margin-bottom:18px;}
+  .stat-chip{flex:1;background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:8px 10px;text-align:center;}
+  .stat-chip .n{font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;color:var(--text);}
+  .stat-chip .l{font-size:10px;color:var(--text-muted);letter-spacing:0.05em;text-transform:uppercase;}
+
+  .view-switch{display:flex;background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:4px;margin-bottom:14px;}
+  .view-switch button{
+    flex:1;padding:9px 0;border:none;background:transparent;color:var(--text-muted);
+    font-family:'Oswald',sans-serif;font-size:12.5px;letter-spacing:0.08em;text-transform:uppercase;
+    border-radius:9px;cursor:pointer;font-weight:500;
+  }
+  .view-switch button.active{background:var(--gold);color:#1a1204;}
+
+  .tabs{display:flex;gap:6px;margin-bottom:14px;overflow-x:auto;}
+  .tab{flex:1;min-width:76px;background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:8px 4px;text-align:center;cursor:pointer;color:var(--text-muted);}
+  .tab .d{font-family:'Oswald',sans-serif;font-weight:600;font-size:13px;letter-spacing:0.05em;}
+  .tab .s{font-size:9.5px;display:block;margin-top:1px;letter-spacing:0.02em;}
+  .tab.active{background:var(--gold-dim);border-color:var(--gold);color:var(--gold);}
+
+  .date-row{display:flex;align-items:center;gap:8px;margin-bottom:14px;color:var(--text-muted);font-size:12.5px;}
+  .date-row input[type=date]{background:var(--panel);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:6px 8px;font-family:'JetBrains Mono',monospace;font-size:12.5px;}
+
+  .info-card{background:var(--panel-2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;font-size:12px;color:var(--text-muted);margin-bottom:14px;line-height:1.5;}
+  .info-card b{color:var(--text);font-weight:600;}
+
+  .ex-card{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:12px;}
+  .ex-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:2px;gap:8px;}
+  .ex-name{font-size:15.5px;font-weight:600;}
+  .ex-target{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--gold);white-space:nowrap;}
+  .ex-suggested{font-size:11.5px;color:var(--text-muted);margin-bottom:10px;}
+  .ex-ref{font-size:11px;color:var(--text-muted);margin-bottom:10px;display:flex;flex-wrap:wrap;gap:10px;}
+  .ex-ref span b{color:var(--teal);font-weight:600;}
+
+  .set-row{display:grid;grid-template-columns:20px 1fr auto 1fr 22px;gap:6px;align-items:center;margin-bottom:6px;}
+  .set-row.time,.set-row.reps{grid-template-columns:20px 1fr 22px;}
+  .set-num{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-muted);text-align:center;}
+  .set-row input{width:100%;background:var(--panel-2);border:1px solid var(--border);color:var(--text);border-radius:7px;padding:7px 6px;font-family:'JetBrains Mono',monospace;font-size:13px;text-align:center;}
+  .set-row input:focus{outline:2px solid var(--gold);outline-offset:1px;}
+  .set-row .x{color:var(--text-muted);text-align:center;font-size:12px;}
+  .remove-set{background:none;border:none;color:var(--text-muted);font-size:13px;cursor:pointer;padding:2px;}
+  .add-set{background:none;border:1px dashed var(--border);color:var(--text-muted);border-radius:7px;padding:6px 10px;font-size:11.5px;cursor:pointer;margin-top:2px;margin-bottom:10px;}
+  .notes-input{width:100%;background:var(--panel-2);border:1px solid var(--border);color:var(--text);border-radius:7px;padding:8px 9px;font-size:12.5px;font-family:'Inter',sans-serif;}
+
+  .save-bar{position:sticky;bottom:10px;margin-top:6px;}
+  .save-btn{width:100%;background:var(--gold);color:#1a1204;border:none;border-radius:12px;padding:14px;font-family:'Oswald',sans-serif;font-size:14px;letter-spacing:0.06em;text-transform:uppercase;font-weight:600;cursor:pointer;}
+  .save-btn:active{transform:scale(0.99);}
+  .backup-btn{width:100%;background:none;border:1px solid var(--border);color:var(--text-muted);border-radius:10px;padding:10px;font-size:12px;cursor:pointer;margin-top:8px;}
+  .backup-textarea{width:100%;min-height:140px;margin-top:10px;background:var(--panel-2);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:10px;font-family:'JetBrains Mono',monospace;font-size:11.5px;}
+  .toast{text-align:center;font-size:12.5px;margin-top:8px;min-height:16px;}
+
+  .milestone-block{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:14px;}
+  .milestone-title{font-size:14px;font-weight:600;margin-bottom:2px;}
+  .milestone-sub{font-size:11.5px;color:var(--text-muted);margin-bottom:12px;}
+  .stage{display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--border);}
+  .stage:first-of-type{border-top:none;}
+  .stage input[type=checkbox]{width:18px;height:18px;accent-color:var(--gold);flex-shrink:0;}
+  .stage-label{flex:1;font-size:13px;}
+  .stage-label.done{color:var(--good);}
+  .stage-date{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--text-muted);}
+
+  .pr-wall{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:14px;}
+  .pr-item{display:flex;justify-content:space-between;padding:8px 0;border-top:1px solid var(--border);font-size:13px;}
+  .pr-item:first-of-type{border-top:none;}
+  .pr-item .w{font-family:'JetBrains Mono',monospace;color:var(--gold);font-weight:700;}
+  .pr-item .dt{color:var(--text-muted);font-size:11px;}
+  .empty-state{color:var(--text-muted);font-size:12.5px;text-align:center;padding:14px 0;}
+
+  .reset-btn{width:100%;background:none;border:1px solid var(--border);color:var(--text-muted);border-radius:10px;padding:11px;font-size:12px;cursor:pointer;margin-top:6px;}
+
+  .loading{text-align:center;color:var(--text-muted);padding:60px 0;font-size:13px;}
+
+  /* ---------- Auth screen ---------- */
+  .auth-wrap{padding-top:40px;}
+  .auth-card{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:22px 18px;}
+  .auth-title{font-size:18px;font-weight:600;margin-bottom:4px;}
+  .auth-sub{font-size:12px;color:var(--text-muted);margin-bottom:18px;}
+  .auth-field{margin-bottom:12px;}
+  .auth-field label{display:block;font-size:11px;color:var(--text-muted);margin-bottom:5px;letter-spacing:0.03em;text-transform:uppercase;}
+  .auth-field input{width:100%;background:var(--panel-2);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:11px 10px;font-size:14px;}
+  .auth-error{background:var(--bad)22;border:1px solid var(--bad);color:var(--bad);border-radius:8px;padding:8px 10px;font-size:12px;margin-bottom:12px;}
+  .auth-btn{width:100%;background:var(--gold);color:#1a1204;border:none;border-radius:10px;padding:13px;font-family:'Oswald',sans-serif;font-size:13.5px;letter-spacing:0.06em;text-transform:uppercase;font-weight:600;cursor:pointer;margin-bottom:10px;}
+  .auth-toggle{text-align:center;font-size:12.5px;color:var(--text-muted);}
+  .auth-toggle a{color:var(--gold);cursor:pointer;text-decoration:none;font-weight:500;}
+  .setup-warning{background:var(--gold-dim);border:1px solid #6b4f22;color:var(--gold);border-radius:10px;padding:14px;font-size:12.5px;line-height:1.6;}
+
+  @media (prefers-reduced-motion: no-preference){
+    .ex-card, .bib{transition:border-color .15s ease;}
+  }
+</style>
+</head>
+<body>
+<div id="app"><div class="loading">Loading your journal…</div></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+<script>
+(function(){
+
+  // =====================================================================
+  // PASTE YOUR FIREBASE CONFIG HERE (from Firebase Console > Project
+  // Settings > Your apps > Web app). See setup steps provided in chat.
+  // =====================================================================
+  var firebaseConfig = {
+    apiKey: "AIzaSyDhhhtzXcgc3kqelUQyqqvPZ2T787xQG3U",
+    authDomain: "training-log-7b96d.firebaseapp.com",
+    projectId: "training-log-7b96d",
+    storageBucket: "training-log-7b96d.firebasestorage.app",
+    messagingSenderId: "1015623505080",
+    appId: "1:1015623505080:web:0d9091656ca534adbdd04d"
+  };
+  // =====================================================================
+
+  var MARATHON_DATE = '2026-11-01';
+  var WEDDING_DATE = '2027-01-24';
+
+  var EXERCISES = {
+    monday: {
+      label:'Lower Body + Push',
+      warmup:'5 min brisk walk/bike · leg swings · bodyweight squats ×10 · band pull-aparts ×15 · arm circles',
+      cooldown:'Quad stretch · hip flexor stretch · chest opener',
+      list:[
+        {id:'m_goblet_squat', name:'Goblet Squat', sets:3, target:'10', type:'weight', suggested:'15–20 lb DB'},
+        {id:'m_rdl', name:'Romanian Deadlift', sets:3, target:'10', type:'weight', suggested:'2×15 lb DB'},
+        {id:'m_incline_pushup', name:'Incline Push-Up', sets:3, target:'AMRAP', type:'reps', suggested:'Lower the incline as you progress'},
+        {id:'m_shoulder_press', name:'DB Shoulder Press', sets:3, target:'10', type:'weight', suggested:'2×8–10 lb'},
+        {id:'m_walking_lunge', name:'Walking Lunges', sets:3, target:'10/leg', type:'weight', suggested:'2×10 lb DB'},
+        {id:'m_calf_raise', name:'Standing Calf Raise', sets:3, target:'15', type:'weight', suggested:'Bodyweight or DBs'},
+        {id:'m_dead_bug', name:'Dead Bug', sets:3, target:'10/side', type:'reps', suggested:'Bodyweight — low back flat'},
+        {id:'m_tricep_ext', name:'Overhead Triceps Extension', sets:3, target:'12', type:'weight', suggested:'1×10–12 lb'}
+      ]
+    },
+    tuesday: {
+      label:'Arms, Shoulders & Core',
+      warmup:'Arm circles · light cardio · shoulder rolls',
+      cooldown:'Light full-body stretch',
+      list:[
+        {id:'t_bicep_curl', name:'DB Bicep Curl', sets:3, target:'12', type:'weight', suggested:'2×10–12 lb'},
+        {id:'t_tricep_ext', name:'Overhead Triceps Extension', sets:3, target:'12', type:'weight', suggested:'1×12–15 lb'},
+        {id:'t_lateral_raise', name:'Lateral Raise', sets:3, target:'12', type:'weight', suggested:'2×5–8 lb'},
+        {id:'t_calf_raise', name:'Calf Raise', sets:3, target:'15', type:'weight', suggested:'Bodyweight or DB'},
+        {id:'t_crunch', name:'Cable / Bodyweight Crunch', sets:3, target:'15', type:'reps', suggested:'Light, controlled'},
+        {id:'t_side_plank', name:'Side Plank', sets:2, target:'20–30s/side', type:'time', suggested:'Bodyweight'}
+      ]
+    },
+    wednesday: {
+      label:'Pull + Stability',
+      warmup:'5 min row/bike · cat-cow · thoracic rotations · glute bridges ×10 · scapular pull-ups',
+      cooldown:"Lat stretch · figure-4 stretch · child's pose",
+      list:[
+        {id:'w_lat_pulldown', name:'Lat Pulldown', sets:3, target:'10', type:'weight', suggested:'Challenging by rep 8'},
+        {id:'w_bulgarian_split_squat', name:'Bulgarian Split Squat', sets:3, target:'8/leg', type:'weight', suggested:'2×10–12 lb DB'},
+        {id:'w_cable_row', name:'Seated Cable Row', sets:3, target:'10', type:'weight', suggested:'Challenging by rep 8'},
+        {id:'w_single_arm_row', name:'DB Single-Arm Row', sets:3, target:'10/side', type:'weight', suggested:'12–15 lb'},
+        {id:'w_face_pull', name:'Face Pulls', sets:3, target:'12', type:'weight', suggested:'Light–moderate'},
+        {id:'w_single_leg_rdl', name:'Single-Leg RDL', sets:3, target:'8/leg', type:'weight', suggested:'Bodyweight or light DB'},
+        {id:'w_side_plank', name:'Side Plank', sets:3, target:'20–30s/side', type:'time', suggested:'Bodyweight'},
+        {id:'w_bicep_curl', name:'DB Bicep Curl', sets:3, target:'12', type:'weight', suggested:'2×8–10 lb'}
+      ]
+    },
+    friday: {
+      label:'Full Body + Core',
+      warmup:'5 min incline walk · bodyweight RDLs ×10 · hip circles · arm swings',
+      cooldown:'Hamstring stretch · spinal twist · deep breathing',
+      list:[
+        {id:'f_db_deadlift', name:'DB Deadlift', sets:4, target:'8', type:'weight', suggested:'2×15–20 lb'},
+        {id:'f_step_up', name:'Step-Ups', sets:3, target:'8/leg', type:'weight', suggested:'2×10 lb DB'},
+        {id:'f_chest_press', name:'Chest Press', sets:3, target:'10', type:'weight', suggested:'2×10–12 lb'},
+        {id:'f_hip_thrust', name:'Hip Thrust', sets:3, target:'12', type:'weight', suggested:'Bodyweight → add DB'},
+        {id:'f_lateral_raise', name:'DB Lateral Raise', sets:3, target:'12', type:'weight', suggested:'2×5–8 lb'},
+        {id:'f_plank', name:'Plank', sets:3, target:'30–45s', type:'time', suggested:'Bodyweight'},
+        {id:'f_bicycle_crunch', name:'Bicycle Crunches', sets:3, target:'15/side', type:'reps', suggested:'Bodyweight'},
+        {id:'f_russian_twist', name:'Russian Twists', sets:3, target:'15/side', type:'reps', suggested:'Bodyweight or light DB'}
+      ]
+    }
+  };
+
+  var DAY_ORDER = ['monday','tuesday','wednesday','friday'];
+  var DAY_TAB = {monday:{d:'MON',s:'Lower + Push'}, tuesday:{d:'TUE',s:'Arms & Core'}, wednesday:{d:'WED',s:'Pull + Stability'}, friday:{d:'FRI',s:'Full Body'}};
+
+  var PUSHUP_STAGES = ['Wall push-up','High incline push-up','Low incline push-up','Knee push-up','Full push-up (unassisted)'];
+  var PULLUP_STAGES = ['Dead hang, 20s','Band-assisted pull-up (heavy band)','Band-assisted pull-up (light band)','Negative pull-up (5s slow lower)','Full pull-up (unassisted)'];
+
+  var configOk = firebaseConfig.apiKey && firebaseConfig.apiKey.indexOf('PASTE_') !== 0;
+  var app, auth, db;
+  if(configOk){
+    app = firebase.initializeApp(firebaseConfig);
+    auth = firebase.auth();
+    db = firebase.firestore();
+  }
+
+  var data = null;
+  var view = 'log';
+  var activeDay = defaultDay();
+  var activeDate = todayISO();
+  var authChecked = false;
+  var currentUser = null;
+  var authMode = 'login'; // 'login' | 'signup'
+  var authError = '';
+  var authBusy = false;
+
+  function todayISO(){
+    var d = new Date();
+    var local = new Date(d.getTime() - d.getTimezoneOffset()*60000);
+    return local.toISOString().slice(0,10);
+  }
+  function defaultDay(){
+    var idx = new Date().getDay();
+    var map = {1:'monday',2:'tuesday',3:'wednesday',5:'friday'};
+    return map[idx] || 'monday';
+  }
+  function fmtDate(iso){
+    var d = new Date(iso+'T00:00:00');
+    return d.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+  }
+  function daysUntil(iso){
+    var target = new Date(iso+'T00:00:00');
+    var now = new Date();
+    var nowMid = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    return Math.ceil((target - nowMid)/86400000);
+  }
+  function defaultData(){
+    return {sessions:{}, milestones:{pushup:{}, pullup:{}}, prs:[]};
+  }
+
+  async function loadData(){
+    try{
+      var doc = await db.collection('users').doc(currentUser.uid).collection('journal').doc('data').get();
+      if(doc.exists && doc.data().payload) return JSON.parse(doc.data().payload);
+      return defaultData();
+    }catch(e){
+      return defaultData();
+    }
+  }
+  async function persist(){
+    if(!currentUser) return {ok:false, error:'Not signed in.'};
+    try{
+      await db.collection('users').doc(currentUser.uid).collection('journal').doc('data').set({
+        payload: JSON.stringify(data),
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      return {ok:true};
+    }catch(e){
+      return {ok:false, error: (e && e.message) ? e.message : String(e)};
+    }
+  }
+
+  function sessionKey(date, day){ return date + '__' + day; }
+
+  function allSessionsForDayExercise(day, exId){
+    var out = [];
+    for(var key in data.sessions){
+      var s = data.sessions[key];
+      if(s.day === day && s.exercises && s.exercises[exId]){
+        out.push({date:s.date, entry:s.exercises[exId]});
+      }
+    }
+    out.sort(function(a,b){ return a.date < b.date ? 1 : -1; });
+    return out;
+  }
+  function bestWeight(day, exId){
+    var hist = allSessionsForDayExercise(day, exId);
+    var best = 0;
+    hist.forEach(function(h){
+      (h.entry.sets||[]).forEach(function(s){ if(s.weight && s.weight > best) best = s.weight; });
+    });
+    return best;
+  }
+
+  function summarizeSets(ex, sets){
+    if(!sets || !sets.length) return '—';
+    if(ex.type==='weight') return sets.map(function(s){ return (s.weight!=null?s.weight:'?')+'×'+(s.reps!=null?s.reps:'?'); }).join(', ');
+    if(ex.type==='time') return sets.map(function(s){ return (s.seconds!=null?s.seconds:'?')+'s'; }).join(', ');
+    return sets.map(function(s){ return (s.reps!=null?s.reps:'?'); }).join(', ');
+  }
+
+  function setRowHTML(ex, idx, prefill){
+    var num = '<span class="set-num">'+(idx+1)+'</span>';
+    if(ex.type==='weight'){
+      return '<div class="set-row weight">'+num+
+        '<input type="number" step="0.5" inputmode="decimal" class="inp-weight" placeholder="lb" value="'+(prefill&&prefill.weight!=null?prefill.weight:'')+'">'+
+        '<span class="x">×</span>'+
+        '<input type="number" step="1" inputmode="numeric" class="inp-reps" placeholder="reps" value="'+(prefill&&prefill.reps!=null?prefill.reps:'')+'">'+
+        '<button class="remove-set" type="button" aria-label="Remove set" onclick="this.parentElement.remove()">✕</button></div>';
+    }
+    if(ex.type==='time'){
+      return '<div class="set-row time">'+num+
+        '<input type="number" step="1" inputmode="numeric" class="inp-seconds" placeholder="sec" value="'+(prefill&&prefill.seconds!=null?prefill.seconds:'')+'">'+
+        '<button class="remove-set" type="button" aria-label="Remove set" onclick="this.parentElement.remove()">✕</button></div>';
+    }
+    return '<div class="set-row reps">'+num+
+      '<input type="number" step="1" inputmode="numeric" class="inp-reps" placeholder="reps" value="'+(prefill&&prefill.reps!=null?prefill.reps:'')+'">'+
+      '<button class="remove-set" type="button" aria-label="Remove set" onclick="this.parentElement.remove()">✕</button></div>';
+  }
+
+  function renderExerciseCard(ex, day, date){
+    var hist = allSessionsForDayExercise(day, ex.id);
+    var last = hist.find(function(h){ return h.date !== date; }) || null;
+    var best = bestWeight(day, ex.id);
+    var curKey = sessionKey(date, day);
+    var existing = data.sessions[curKey] && data.sessions[curKey].exercises[ex.id];
+
+    var rowsHTML = '';
+    var n = existing ? existing.sets.length : ex.sets;
+    if(n < 1) n = ex.sets;
+    for(var i=0;i<n;i++){
+      rowsHTML += setRowHTML(ex, i, existing ? existing.sets[i] : null);
+    }
+
+    var refHTML = '<div class="ex-ref">';
+    if(last) refHTML += '<span>Last (' + fmtDate(last.date) + '): <b>' + summarizeSets(ex, last.entry.sets) + '</b></span>';
+    if(best>0) refHTML += '<span>Best: <b>'+best+' lb</b></span>';
+    if(!last && !best) refHTML = '<div class="ex-ref"><span style="color:var(--text-muted)">First time logging this one — set your baseline.</span>';
+    refHTML += '</div>';
+
+    return '<div class="ex-card" id="card-'+ex.id+'" data-exid="'+ex.id+'" data-type="'+ex.type+'">'+
+      '<div class="ex-head"><span class="ex-name">'+ex.name+'</span><span class="ex-target">'+ex.sets+'×'+ex.target+'</span></div>'+
+      '<div class="ex-suggested">'+ex.suggested+'</div>'+
+      refHTML+
+      '<div class="sets-container" id="sets-'+ex.id+'">'+rowsHTML+'</div>'+
+      '<button type="button" class="add-set" onclick="App.addSet(\''+ex.id+'\')">+ Add set</button>'+
+      '<input type="text" class="notes-input" id="notes-'+ex.id+'" placeholder="Notes (optional)" value="'+((existing&&existing.notes)?existing.notes.replace(/"/g,'&quot;'):'')+'">'+
+    '</div>';
+  }
+
+  function renderLogView(){
+    var day = EXERCISES[activeDay];
+    var html = '';
+
+    html += '<div class="tabs">';
+    DAY_ORDER.forEach(function(d){
+      var t = DAY_TAB[d];
+      html += '<div class="tab'+(d===activeDay?' active':'')+'" onclick="App.setDay(\''+d+'\')"><span class="d">'+t.d+'</span><span class="s">'+t.s+'</span></div>';
+    });
+    html += '</div>';
+
+    html += '<div class="date-row">Logging for <input type="date" id="dateInput" value="'+activeDate+'" onchange="App.setDate(this.value)"></div>';
+    html += '<div class="info-card"><b>Warm-up:</b> '+day.warmup+'</div>';
+
+    day.list.forEach(function(ex){
+      html += renderExerciseCard(ex, activeDay, activeDate);
+    });
+
+    html += '<div class="info-card"><b>Cool-down:</b> '+day.cooldown+'</div>';
+    html += '<div class="save-bar"><button class="save-btn" onclick="App.saveDay()">Save Workout</button>'+
+      '<button class="backup-btn" onclick="App.showBackup()">Show as text (backup)</button>'+
+      '<div class="toast" id="toast"></div><div id="backupBox"></div></div>';
+
+    return html;
+  }
+
+  function renderMilestones(){
+    var html = '';
+
+    html += '<div class="milestone-block"><div class="milestone-title">Push-Up Progression</div><div class="milestone-sub">Check off each stage as you land it.</div>';
+    PUSHUP_STAGES.forEach(function(label, i){
+      var done = data.milestones.pushup[i];
+      html += '<div class="stage"><input type="checkbox" '+(done?'checked':'')+' onchange="App.toggleMilestone(\'pushup\','+i+',this.checked)">'+
+        '<span class="stage-label'+(done?' done':'')+'">'+label+'</span>'+
+        (done?'<span class="stage-date">'+fmtDate(done)+'</span>':'')+'</div>';
+    });
+    html += '</div>';
+
+    html += '<div class="milestone-block"><div class="milestone-title">Pull-Up Progression</div><div class="milestone-sub">Check off each stage as you land it.</div>';
+    PULLUP_STAGES.forEach(function(label, i){
+      var done = data.milestones.pullup[i];
+      html += '<div class="stage"><input type="checkbox" '+(done?'checked':'')+' onchange="App.toggleMilestone(\'pullup\','+i+',this.checked)">'+
+        '<span class="stage-label'+(done?' done':'')+'">'+label+'</span>'+
+        (done?'<span class="stage-date">'+fmtDate(done)+'</span>':'')+'</div>';
+    });
+    html += '</div>';
+
+    html += '<div class="pr-wall"><div class="milestone-title">PR Wall</div><div class="milestone-sub">Auto-logged whenever you beat a previous weight.</div>';
+    var prs = (data.prs||[]).slice().sort(function(a,b){ return a.date<b.date?1:-1; });
+    if(!prs.length){
+      html += '<div class="empty-state">No PRs yet — log a heavier set to start your wall.</div>';
+    } else {
+      prs.forEach(function(p){
+        html += '<div class="pr-item"><span>'+p.exName+'</span><span class="w">'+p.weight+' lb <span class="dt">· '+fmtDate(p.date)+'</span></span></div>';
+      });
+    }
+    html += '</div>';
+
+    html += '<button class="reset-btn" onclick="App.resetAll()">Clear all journal data</button>';
+    return html;
+  }
+
+  function renderAuthScreen(){
+    var html = '<div class="auth-wrap"><div class="eyebrow">Strength × Marathon × Wedding</div><div class="app-title" style="margin-bottom:20px;">Training Log</div>';
+    html += '<div class="auth-card">';
+    html += '<div class="auth-title">'+(authMode==='login'?'Log in':'Create your account')+'</div>';
+    html += '<div class="auth-sub">'+(authMode==='login'?'Sign in to sync your journal across devices.':'One free account, usable on your phone and laptop.')+'</div>';
+    if(authError) html += '<div class="auth-error">'+authError+'</div>';
+    html += '<div class="auth-field"><label>Email</label><input type="email" id="authEmail" autocomplete="email" placeholder="you@example.com"></div>';
+    html += '<div class="auth-field"><label>Password</label><input type="password" id="authPassword" autocomplete="'+(authMode==='login'?'current-password':'new-password')+'" placeholder="At least 6 characters"></div>';
+    html += '<button class="auth-btn" onclick="App.submitAuth()" '+(authBusy?'disabled':'')+'>'+(authBusy?'Please wait…':(authMode==='login'?'Log In':'Create Account'))+'</button>';
+    html += '<div class="auth-toggle">'+(authMode==='login'?'New here? <a onclick="App.toggleAuthMode()">Create an account</a>':'Already have an account? <a onclick="App.toggleAuthMode()">Log in</a>')+'</div>';
+    html += '</div></div>';
+    return html;
+  }
+
+  function renderSetupWarning(){
+    return '<div class="auth-wrap"><div class="eyebrow">Strength × Marathon × Wedding</div><div class="app-title" style="margin-bottom:20px;">Training Log</div>'+
+      '<div class="setup-warning">⚠️ <b>Firebase isn\'t configured yet.</b><br><br>Open this file, find the <code>firebaseConfig</code> object near the top of the script, and paste in your project\'s config values from the Firebase Console. Full steps are in the chat where this file was shared.</div></div>';
+  }
+
+  function render(){
+    if(!configOk){
+      document.getElementById('app').innerHTML = renderSetupWarning();
+      return;
+    }
+    if(!authChecked){
+      document.getElementById('app').innerHTML = '<div class="loading">Loading your journal…</div>';
+      return;
+    }
+    if(!currentUser){
+      document.getElementById('app').innerHTML = renderAuthScreen();
+      return;
+    }
+    if(!data){
+      document.getElementById('app').innerHTML = '<div class="loading">Loading your journal…</div>';
+      return;
+    }
+
+    var marathonDays = daysUntil(MARATHON_DATE);
+    var weddingDays = daysUntil(WEDDING_DATE);
+    var today = new Date();
+    var mDate = new Date(MARATHON_DATE+'T00:00:00');
+    var wDate = new Date(WEDDING_DATE+'T00:00:00');
+    var phase = today < mDate ? 'Marathon Prep — protect the legs, build the base'
+      : (today < wDate ? 'Wedding Countdown — recomposition focus, go heavier' : 'Maintenance');
+
+    var sessionCount = Object.keys(data.sessions).length;
+    var weekStart = new Date();
+    weekStart.setDate(weekStart.getDate() - weekStart.getDay() + 1);
+    var weekStartISO = new Date(weekStart.getTime() - weekStart.getTimezoneOffset()*60000).toISOString().slice(0,10);
+    var thisWeek = Object.values(data.sessions).filter(function(s){ return s.date >= weekStartISO; }).length;
+
+    var html = '';
+    html += '<div class="eyebrow">Strength × Marathon × Wedding</div>';
+    html += '<div class="app-title">Training Log</div>';
+    html += '<div class="account-line">'+currentUser.email+' · <a onclick="App.logout()">Sign out</a></div>';
+
+    html += '<div class="bibs">';
+    html += '<div class="bib bib-teal"><div class="bib-label">NYC Marathon</div><div class="bib-number">'+marathonDays+'</div><div class="bib-sub">days to go · Nov 1, 2026</div></div>';
+    html += '<div class="bib bib-rose"><div class="bib-label">Wedding Day</div><div class="bib-number">'+weddingDays+'</div><div class="bib-sub">days to go · Jan 24, 2027</div></div>';
+    html += '</div>';
+
+    html += '<div class="phase-banner">'+phase+'</div>';
+
+    html += '<div class="stat-row">'+
+      '<div class="stat-chip"><div class="n">'+sessionCount+'</div><div class="l">Logged</div></div>'+
+      '<div class="stat-chip"><div class="n">'+thisWeek+'/4</div><div class="l">This week</div></div>'+
+      '<div class="stat-chip"><div class="n">'+(data.prs||[]).length+'</div><div class="l">PRs</div></div>'+
+    '</div>';
+
+    html += '<div class="view-switch">'+
+      '<button class="'+(view==='log'?'active':'')+'" onclick="App.setView(\'log\')">Workout Log</button>'+
+      '<button class="'+(view==='milestones'?'active':'')+'" onclick="App.setView(\'milestones\')">Milestones & PRs</button>'+
+    '</div>';
+
+    html += view==='log' ? renderLogView() : renderMilestones();
+
+    document.getElementById('app').innerHTML = html;
+  }
+
+  function gatherSets(ex){
+    var container = document.getElementById('sets-'+ex.id);
+    var rows = container.querySelectorAll('.set-row');
+    var out = [];
+    rows.forEach(function(row){
+      if(ex.type==='weight'){
+        var w = row.querySelector('.inp-weight').value;
+        var r = row.querySelector('.inp-reps').value;
+        if(w!=='' || r!==''){
+          out.push({weight: w===''?null:parseFloat(w), reps: r===''?null:parseInt(r,10)});
+        }
+      } else if(ex.type==='time'){
+        var s = row.querySelector('.inp-seconds').value;
+        if(s!=='') out.push({seconds: parseInt(s,10)});
+      } else {
+        var rr = row.querySelector('.inp-reps').value;
+        if(rr!=='') out.push({reps: parseInt(rr,10)});
+      }
+    });
+    return out;
+  }
+
+  window.App = {
+    setDay: function(d){ activeDay = d; view='log'; render(); },
+    setDate: function(v){ activeDate = v; render(); },
+    setView: function(v){ view = v; render(); },
+    addSet: function(exId){
+      var day = EXERCISES[activeDay];
+      var ex = day.list.find(function(e){ return e.id===exId; });
+      var container = document.getElementById('sets-'+exId);
+      var idx = container.querySelectorAll('.set-row').length;
+      container.insertAdjacentHTML('beforeend', setRowHTML(ex, idx, null));
+    },
+    toggleMilestone: function(kind, idx, checked){
+      data.milestones[kind][idx] = checked ? todayISO() : null;
+      persist();
+      render();
+    },
+    saveDay: function(){
+      var day = EXERCISES[activeDay];
+      var key = sessionKey(activeDate, activeDay);
+      var exercisesOut = {};
+      var newPRs = [];
+
+      day.list.forEach(function(ex){
+        var sets = gatherSets(ex);
+        var notesEl = document.getElementById('notes-'+ex.id);
+        var notes = notesEl ? notesEl.value : '';
+        if(sets.length === 0 && !notes) return;
+        exercisesOut[ex.id] = {sets: sets, notes: notes};
+
+        if(ex.type==='weight' && sets.length){
+          var prevBest = bestWeight(activeDay, ex.id);
+          var newMax = 0;
+          sets.forEach(function(s){ if(s.weight && s.weight>newMax) newMax = s.weight; });
+          if(prevBest>0 && newMax>prevBest){
+            data.prs = (data.prs||[]).filter(function(p){ return !(p.exId===ex.id && p.date===activeDate); });
+            var pr = {exId:ex.id, exName:ex.name, weight:newMax, date:activeDate};
+            data.prs.push(pr);
+            newPRs.push(pr);
+          }
+        }
+      });
+
+      data.sessions[key] = {date: activeDate, day: activeDay, exercises: exercisesOut};
+
+      persist().then(function(result){
+        var toast = document.getElementById('toast');
+        if(!result.ok){
+          if(toast){ toast.style.color = 'var(--bad)'; toast.textContent = "Couldn't save: " + result.error; }
+          return;
+        }
+        var msg = 'Workout saved';
+        if(newPRs.length) msg += ' · ' + newPRs.length + ' new PR' + (newPRs.length>1?'s':'') + ' 🎉';
+        if(toast){ toast.style.color = 'var(--good)'; toast.textContent = msg; }
+        render();
+        setTimeout(function(){
+          var t = document.getElementById('toast');
+          if(t) t.textContent = '';
+        }, 4000);
+      });
+    },
+    showBackup: function(){
+      var day = EXERCISES[activeDay];
+      var lines = ['Workout — ' + DAY_TAB[activeDay].d + ' ' + activeDate, ''];
+      day.list.forEach(function(ex){
+        var sets = gatherSets(ex);
+        var notesEl = document.getElementById('notes-'+ex.id);
+        var notes = notesEl ? notesEl.value : '';
+        if(!sets.length && !notes) return;
+        lines.push(ex.name + ': ' + summarizeSets(ex, sets) + (notes ? ' — ' + notes : ''));
+      });
+      if(lines.length === 2){ lines.push('(Nothing entered yet)'); }
+      var box = document.getElementById('backupBox');
+      box.innerHTML = '<textarea class="backup-textarea" readonly id="backupTA">'+lines.join('\n')+'</textarea>';
+      var ta = document.getElementById('backupTA');
+      ta.focus();
+      ta.select();
+    },
+    resetAll: function(){
+      if(!confirm('This will permanently delete all logged workouts, milestones, and PRs. Continue?')) return;
+      data = defaultData();
+      persist().then(function(){ render(); });
+    },
+    toggleAuthMode: function(){
+      authMode = authMode==='login' ? 'signup' : 'login';
+      authError = '';
+      render();
+    },
+    submitAuth: function(){
+      var email = document.getElementById('authEmail').value.trim();
+      var password = document.getElementById('authPassword').value;
+      authError = '';
+      if(!email || !password){ authError = 'Enter both an email and password.'; render(); return; }
+      if(password.length < 6){ authError = 'Password must be at least 6 characters.'; render(); return; }
+      authBusy = true; render();
+      var action = authMode==='login'
+        ? auth.signInWithEmailAndPassword(email, password)
+        : auth.createUserWithEmailAndPassword(email, password);
+      action.catch(function(e){
+        authError = e.message || 'Something went wrong. Try again.';
+      }).finally(function(){
+        authBusy = false; render();
+      });
+    },
+    logout: function(){
+      auth.signOut();
+    }
+  };
+
+  if(configOk){
+    auth.onAuthStateChanged(function(user){
+      authChecked = true;
+      currentUser = user;
+      if(user){
+        loadData().then(function(d){ data = d; render(); });
+      } else {
+        data = null;
+        render();
+      }
+    });
+  } else {
+    render();
+  }
+})();
+</script>
+</body>
+</html>
