@@ -196,67 +196,67 @@
 
   var EXERCISES = {
     monday: {
-      label:'Lower Body + Push',
-      warmup:'5 min brisk walk/bike · leg swings · bodyweight squats ×10 · band pull-aparts ×15 · arm circles',
-      cooldown:'Quad stretch · hip flexor stretch · chest opener',
+      label:'Back + Biceps',
+      warmup:'Band pull-aparts ×15 · scapular pull-ups ×10 · cat-cow · arm circles',
+      cooldown:'Lat stretch · doorway chest stretch · child\'s pose',
       list:[
-        {id:'m_goblet_squat', name:'Goblet Squat', sets:3, target:'10', type:'weight', suggested:'15–20 lb DB'},
-        {id:'m_rdl', name:'Romanian Deadlift', sets:3, target:'10', type:'weight', suggested:'2×15 lb DB'},
-        {id:'m_incline_pushup', name:'Incline Push-Up', sets:3, target:'AMRAP', type:'reps', suggested:'Lower the incline as you progress'},
-        {id:'m_shoulder_press', name:'DB Shoulder Press', sets:3, target:'10', type:'weight', suggested:'2×8–10 lb'},
-        {id:'m_walking_lunge', name:'Walking Lunges', sets:3, target:'10/leg', type:'weight', suggested:'2×10 lb DB'},
-        {id:'m_calf_raise', name:'Standing Calf Raise', sets:3, target:'15', type:'weight', suggested:'Bodyweight or DBs'},
-        {id:'m_dead_bug', name:'Dead Bug', sets:3, target:'10/side', type:'reps', suggested:'Bodyweight — low back flat'},
-        {id:'m_tricep_ext', name:'Overhead Triceps Extension', sets:3, target:'12', type:'weight', suggested:'1×10–12 lb'}
+        {id:'m_lat_pulldown', name:'Lat Pulldown', sets:3, target:'10', type:'weight', suggested:'Challenging by rep 8 — pull-up builder'},
+        {id:'m_cable_row', name:'Seated Cable Row', sets:3, target:'10', type:'weight', suggested:'Challenging by rep 8'},
+        {id:'m_bent_row', name:'Bent-Over DB Row', sets:3, target:'10/side', type:'weight', suggested:'12–15 lb'},
+        {id:'m_face_pull', name:'Face Pulls', sets:3, target:'12', type:'weight', suggested:'Light–moderate'},
+        {id:'m_bicep_curl', name:'DB Bicep Curl', sets:3, target:'12', type:'weight', suggested:'2×10–12 lb'},
+        {id:'m_hammer_curl', name:'Hammer Curl', sets:3, target:'12', type:'weight', suggested:'2×10–12 lb'},
+        {id:'m_hanging_knee_raise', name:'Hanging Knee Raise / Cable Crunch', sets:3, target:'12–15', type:'reps', suggested:'Ab work'},
+        {id:'m_side_plank', name:'Side Plank', sets:2, target:'30s/side', type:'time', suggested:'Bodyweight'}
       ]
     },
     tuesday: {
-      label:'Arms, Shoulders & Core',
-      warmup:'Arm circles · light cardio · shoulder rolls',
-      cooldown:'Light full-body stretch',
+      label:'Chest, Triceps & Shoulders',
+      warmup:'Arm circles · band pull-aparts ×15 · light cardio',
+      cooldown:'Chest doorway stretch · tricep overhead stretch · child\'s pose',
       list:[
-        {id:'t_bicep_curl', name:'DB Bicep Curl', sets:3, target:'12', type:'weight', suggested:'2×10–12 lb'},
-        {id:'t_tricep_ext', name:'Overhead Triceps Extension', sets:3, target:'12', type:'weight', suggested:'1×12–15 lb'},
+        {id:'t_chest_press', name:'DB Chest Press', sets:3, target:'10', type:'weight', suggested:'2×10–12 lb'},
+        {id:'t_incline_press', name:'Incline DB Press', sets:3, target:'10', type:'weight', suggested:'2×8–10 lb'},
+        {id:'t_incline_pushup', name:'Incline Push-Up', sets:3, target:'AMRAP', type:'reps', suggested:'Lower the incline as you progress — push-up builder'},
+        {id:'t_tricep_pushdown', name:'Tricep Pushdown', sets:3, target:'12', type:'weight', suggested:'Challenging by rep 10'},
+        {id:'t_tricep_ext', name:'Overhead Tricep Extension', sets:3, target:'12', type:'weight', suggested:'1×12–15 lb'},
         {id:'t_lateral_raise', name:'Lateral Raise', sets:3, target:'12', type:'weight', suggested:'2×5–8 lb'},
-        {id:'t_calf_raise', name:'Calf Raise', sets:3, target:'15', type:'weight', suggested:'Bodyweight or DB'},
-        {id:'t_crunch', name:'Cable / Bodyweight Crunch', sets:3, target:'15', type:'reps', suggested:'Light, controlled'},
-        {id:'t_side_plank', name:'Side Plank', sets:2, target:'20–30s/side', type:'time', suggested:'Bodyweight'}
+        {id:'t_plank', name:'Plank / Cable Woodchopper', sets:3, target:'30–45s or 10/side', type:'time', suggested:'Rotational core for arm-drive'}
       ]
     },
     wednesday: {
-      label:'Pull + Stability',
-      warmup:'5 min row/bike · cat-cow · thoracic rotations · glute bridges ×10 · scapular pull-ups',
-      cooldown:"Lat stretch · figure-4 stretch · child's pose",
+      label:'Shoulders, Lats, Lower Back & Core',
+      warmup:'5 min row/bike · cat-cow · thoracic rotations · shoulder rolls',
+      cooldown:'Child\'s pose · seated spinal twist · lat stretch',
       list:[
+        {id:'w_shoulder_press', name:'DB Shoulder Press', sets:3, target:'10', type:'weight', suggested:'2×8–10 lb'},
+        {id:'w_arnold_press', name:'Arnold Press', sets:3, target:'10', type:'weight', suggested:'2×8–10 lb'},
         {id:'w_lat_pulldown', name:'Lat Pulldown', sets:3, target:'10', type:'weight', suggested:'Challenging by rep 8'},
-        {id:'w_bulgarian_split_squat', name:'Bulgarian Split Squat', sets:3, target:'8/leg', type:'weight', suggested:'2×10–12 lb DB'},
-        {id:'w_cable_row', name:'Seated Cable Row', sets:3, target:'10', type:'weight', suggested:'Challenging by rep 8'},
-        {id:'w_single_arm_row', name:'DB Single-Arm Row', sets:3, target:'10/side', type:'weight', suggested:'12–15 lb'},
-        {id:'w_face_pull', name:'Face Pulls', sets:3, target:'12', type:'weight', suggested:'Light–moderate'},
-        {id:'w_single_leg_rdl', name:'Single-Leg RDL', sets:3, target:'8/leg', type:'weight', suggested:'Bodyweight or light DB'},
-        {id:'w_side_plank', name:'Side Plank', sets:3, target:'20–30s/side', type:'time', suggested:'Bodyweight'},
-        {id:'w_bicep_curl', name:'DB Bicep Curl', sets:3, target:'12', type:'weight', suggested:'2×8–10 lb'}
+        {id:'w_hyperextension', name:'Hyperextension', sets:3, target:'12', type:'weight', suggested:'Bodyweight → hold a plate'},
+        {id:'w_incline_crunch', name:'Incline Crunches', sets:3, target:'15', type:'reps', suggested:'Bodyweight'},
+        {id:'w_reverse_crunch', name:'Reverse Crunch / Leg Raise', sets:3, target:'12', type:'reps', suggested:'Lower abs'},
+        {id:'w_plank', name:'Plank', sets:3, target:'30–45s', type:'time', suggested:'Bodyweight'}
       ]
     },
-    friday: {
-      label:'Full Body + Core',
-      warmup:'5 min incline walk · bodyweight RDLs ×10 · hip circles · arm swings',
-      cooldown:'Hamstring stretch · spinal twist · deep breathing',
+    thursday: {
+      label:'Legs + Running Stability',
+      warmup:'Hip circles · leg swings · bodyweight squats ×10 · ankle mobility',
+      cooldown:'Quad stretch · hamstring stretch · figure-4 stretch · foam roll IT band/calves',
       list:[
-        {id:'f_db_deadlift', name:'DB Deadlift', sets:4, target:'8', type:'weight', suggested:'2×15–20 lb'},
-        {id:'f_step_up', name:'Step-Ups', sets:3, target:'8/leg', type:'weight', suggested:'2×10 lb DB'},
-        {id:'f_chest_press', name:'Chest Press', sets:3, target:'10', type:'weight', suggested:'2×10–12 lb'},
-        {id:'f_hip_thrust', name:'Hip Thrust', sets:3, target:'12', type:'weight', suggested:'Bodyweight → add DB'},
-        {id:'f_lateral_raise', name:'DB Lateral Raise', sets:3, target:'12', type:'weight', suggested:'2×5–8 lb'},
-        {id:'f_plank', name:'Plank', sets:3, target:'30–45s', type:'time', suggested:'Bodyweight'},
-        {id:'f_bicycle_crunch', name:'Bicycle Crunches', sets:3, target:'15/side', type:'reps', suggested:'Bodyweight'},
-        {id:'f_russian_twist', name:'Russian Twists', sets:3, target:'15/side', type:'reps', suggested:'Bodyweight or light DB'}
+        {id:'h_goblet_squat', name:'Goblet Squat', sets:3, target:'10', type:'weight', suggested:'15–20 lb DB'},
+        {id:'h_leg_press', name:'Leg Press', sets:3, target:'10', type:'weight', suggested:'Challenging by rep 8'},
+        {id:'h_leg_extension', name:'Leg Extension', sets:3, target:'12', type:'weight', suggested:'Moderate'},
+        {id:'h_leg_curl', name:'Leg Curl', sets:3, target:'12', type:'weight', suggested:'Moderate'},
+        {id:'h_abductor_adductor', name:'Abductor / Adductor (alternate weekly)', sets:3, target:'15', type:'weight', suggested:'Hip stability for injury prevention'},
+        {id:'h_calf_raise', name:'Standing Calf Raise', sets:3, target:'15', type:'weight', suggested:'Bodyweight or DBs'},
+        {id:'h_single_leg_rdl', name:'Single-Leg RDL / Step-Up', sets:3, target:'8/leg', type:'weight', suggested:'Bodyweight or light DB — single-leg running strength'},
+        {id:'h_ab_work', name:'Cable Crunch / Decline Sit-Up', sets:3, target:'15', type:'reps', suggested:'Bodyweight or light plate'}
       ]
     }
   };
 
-  var DAY_ORDER = ['monday','tuesday','wednesday','friday'];
-  var DAY_TAB = {monday:{d:'MON',s:'Lower + Push'}, tuesday:{d:'TUE',s:'Arms & Core'}, wednesday:{d:'WED',s:'Pull + Stability'}, friday:{d:'FRI',s:'Full Body'}};
+  var DAY_ORDER = ['monday','tuesday','wednesday','thursday'];
+  var DAY_TAB = {monday:{d:'MON',s:'Back + Bi'}, tuesday:{d:'TUE',s:'Chest/Tri'}, wednesday:{d:'WED',s:'Shldr/Core'}, thursday:{d:'THU',s:'Legs'}};
 
   var PUSHUP_STAGES = ['Wall push-up','High incline push-up','Low incline push-up','Knee push-up','Full push-up (unassisted)'];
   var PULLUP_STAGES = ['Dead hang, 20s','Band-assisted pull-up (heavy band)','Band-assisted pull-up (light band)','Negative pull-up (5s slow lower)','Full pull-up (unassisted)'];
@@ -286,7 +286,7 @@
   }
   function defaultDay(){
     var idx = new Date().getDay();
-    var map = {1:'monday',2:'tuesday',3:'wednesday',5:'friday'};
+    var map = {1:'monday',2:'tuesday',3:'wednesday',4:'thursday'};
     return map[idx] || 'monday';
   }
   function fmtDate(iso){
