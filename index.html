@@ -53,7 +53,6 @@
   .account-line{font-size:11.5px;color:var(--text-muted);margin-bottom:16px;}
   .account-line a{color:var(--gold);cursor:pointer;text-decoration:none;}
 
-  /* ---------- Bibs ---------- */
   .bibs{display:flex;gap:10px;margin-bottom:12px;}
   .bib{
     flex:1;position:relative;background:var(--panel);border:2px dashed var(--border);
@@ -85,7 +84,7 @@
   .view-switch{display:flex;background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:4px;margin-bottom:14px;}
   .view-switch button{
     flex:1;padding:9px 0;border:none;background:transparent;color:var(--text-muted);
-    font-family:'Oswald',sans-serif;font-size:12.5px;letter-spacing:0.08em;text-transform:uppercase;
+    font-family:'Oswald',sans-serif;font-size:12.5px;letter-spacing:0.06em;text-transform:uppercase;
     border-radius:9px;cursor:pointer;font-weight:500;
   }
   .view-switch button.active{background:var(--gold);color:#1a1204;}
@@ -93,7 +92,7 @@
   .tabs{display:flex;gap:6px;margin-bottom:14px;overflow-x:auto;}
   .tab{flex:1;min-width:76px;background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:8px 4px;text-align:center;cursor:pointer;color:var(--text-muted);}
   .tab .d{font-family:'Oswald',sans-serif;font-weight:600;font-size:13px;letter-spacing:0.05em;}
-  .tab .s{font-size:9.5px;display:block;margin-top:1px;letter-spacing:0.02em;}
+  .tab .s{font-size:9.5px;display:block;margin-top:1px;letter-spacing:0.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .tab.active{background:var(--gold-dim);border-color:var(--gold);color:var(--gold);}
 
   .date-row{display:flex;align-items:center;gap:8px;margin-bottom:14px;color:var(--text-muted);font-size:12.5px;}
@@ -119,10 +118,13 @@
   .remove-set{background:none;border:none;color:var(--text-muted);font-size:13px;cursor:pointer;padding:2px;}
   .add-set{background:none;border:1px dashed var(--border);color:var(--text-muted);border-radius:7px;padding:6px 10px;font-size:11.5px;cursor:pointer;margin-top:2px;margin-bottom:10px;}
   .notes-input{width:100%;background:var(--panel-2);border:1px solid var(--border);color:var(--text);border-radius:7px;padding:8px 9px;font-size:12.5px;font-family:'Inter',sans-serif;}
+  .check-row{display:flex;align-items:center;gap:10px;font-size:13.5px;cursor:pointer;padding:6px 0;color:var(--text);}
+  .check-row input[type=checkbox]{width:19px;height:19px;accent-color:var(--gold);flex-shrink:0;}
 
   .save-bar{position:sticky;bottom:10px;margin-top:6px;}
   .save-btn{width:100%;background:var(--gold);color:#1a1204;border:none;border-radius:12px;padding:14px;font-family:'Oswald',sans-serif;font-size:14px;letter-spacing:0.06em;text-transform:uppercase;font-weight:600;cursor:pointer;}
   .save-btn:active{transform:scale(0.99);}
+  .save-btn:disabled{opacity:0.45;cursor:default;}
   .backup-btn{width:100%;background:none;border:1px solid var(--border);color:var(--text-muted);border-radius:10px;padding:10px;font-size:12px;cursor:pointer;margin-top:8px;}
   .backup-textarea{width:100%;min-height:140px;margin-top:10px;background:var(--panel-2);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:10px;font-family:'JetBrains Mono',monospace;font-size:11.5px;}
   .toast{text-align:center;font-size:12.5px;margin-top:8px;min-height:16px;}
@@ -148,19 +150,49 @@
 
   .loading{text-align:center;color:var(--text-muted);padding:60px 0;font-size:13px;}
 
-  /* ---------- Auth screen ---------- */
   .auth-wrap{padding-top:40px;}
   .auth-card{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:22px 18px;}
   .auth-title{font-size:18px;font-weight:600;margin-bottom:4px;}
   .auth-sub{font-size:12px;color:var(--text-muted);margin-bottom:18px;}
   .auth-field{margin-bottom:12px;}
   .auth-field label{display:block;font-size:11px;color:var(--text-muted);margin-bottom:5px;letter-spacing:0.03em;text-transform:uppercase;}
-  .auth-field input{width:100%;background:var(--panel-2);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:11px 10px;font-size:14px;}
+  .auth-field input, .auth-field select{width:100%;background:var(--panel-2);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:11px 10px;font-size:14px;}
   .auth-error{background:var(--bad)22;border:1px solid var(--bad);color:var(--bad);border-radius:8px;padding:8px 10px;font-size:12px;margin-bottom:12px;}
   .auth-btn{width:100%;background:var(--gold);color:#1a1204;border:none;border-radius:10px;padding:13px;font-family:'Oswald',sans-serif;font-size:13.5px;letter-spacing:0.06em;text-transform:uppercase;font-weight:600;cursor:pointer;margin-bottom:10px;}
   .auth-toggle{text-align:center;font-size:12.5px;color:var(--text-muted);}
   .auth-toggle a{color:var(--gold);cursor:pointer;text-decoration:none;font-weight:500;}
   .setup-warning{background:var(--gold-dim);border:1px solid #6b4f22;color:var(--gold);border-radius:10px;padding:14px;font-size:12.5px;line-height:1.6;}
+
+  .plan-day-card{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;margin-bottom:10px;}
+  .plan-day-head{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;}
+  .plan-day-title{font-size:14.5px;font-weight:600;}
+  .plan-day-count{font-size:11px;color:var(--text-muted);font-weight:400;margin-left:6px;}
+  .plan-day-actions{display:flex;gap:5px;flex-shrink:0;}
+  .icon-btn{background:var(--panel-2);border:1px solid var(--border);color:var(--text-muted);border-radius:7px;padding:5px 9px;font-size:11px;cursor:pointer;}
+  .icon-btn.danger{color:var(--bad);border-color:#5a2c33;}
+  .icon-btn:disabled{opacity:0.35;cursor:default;}
+  .plan-day-body{margin-top:12px;padding-top:12px;border-top:1px solid var(--border);}
+  .plan-ex-list{margin-top:6px;}
+  .plan-ex-row{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:9px 0;border-top:1px solid var(--border);flex-wrap:wrap;}
+  .plan-ex-row:first-child{border-top:none;}
+  .plan-ex-info{display:flex;flex-direction:column;min-width:0;}
+  .plan-ex-name{font-size:13px;font-weight:500;}
+  .plan-ex-meta{font-size:10.5px;color:var(--text-muted);}
+  .plan-ex-actions{display:flex;gap:5px;flex-shrink:0;}
+  .plan-ex-edit-form{background:var(--panel-2);border:1px solid var(--border);border-radius:10px;padding:12px;margin:8px 0;}
+  .plan-hint{font-size:11px;color:var(--text-muted);margin-top:8px;line-height:1.5;}
+  .done-btn{background:var(--gold);color:#1a1204;border:none;border-radius:9px;padding:10px 14px;font-size:12px;font-weight:600;cursor:pointer;margin-top:4px;margin-right:6px;}
+  .add-day-btn, .add-ex-btn{width:100%;background:none;border:1px dashed var(--border);color:var(--text-muted);border-radius:10px;padding:11px;font-size:12.5px;cursor:pointer;margin-top:4px;}
+  .plan-saved-indicator{text-align:center;font-size:12px;color:var(--good);padding:6px 0;}
+
+  .typeahead-input{width:100%;background:var(--panel-2);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:10px;font-size:13.5px;margin-bottom:8px;}
+  .typeahead-list{max-height:220px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;background:var(--panel-2);}
+  .typeahead-item{display:flex;justify-content:space-between;gap:8px;padding:10px 11px;font-size:13px;cursor:pointer;border-top:1px solid var(--border);}
+  .typeahead-item:first-child{border-top:none;}
+  .typeahead-item:active{background:var(--gold-dim);}
+  .typeahead-meta{color:var(--text-muted);font-size:11px;white-space:nowrap;}
+  .typeahead-empty{padding:10px;font-size:12px;color:var(--text-muted);text-align:center;}
+  .typeahead-warning{font-size:11px;color:var(--gold);margin:2px 0 6px;}
 
   @media (prefers-reduced-motion: no-preference){
     .ex-card, .bib{transition:border-color .15s ease;}
@@ -178,8 +210,7 @@
 (function(){
 
   // =====================================================================
-  // PASTE YOUR FIREBASE CONFIG HERE (from Firebase Console > Project
-  // Settings > Your apps > Web app). See setup steps provided in chat.
+  // FIREBASE CONFIG (from Firebase Console > Project Settings > Your apps)
   // =====================================================================
   var firebaseConfig = {
     apiKey: "AIzaSyDhhhtzXcgc3kqelUQyqqvPZ2T787xQG3U",
@@ -194,24 +225,30 @@
   var MARATHON_DATE = '2026-11-01';
   var WEDDING_DATE = '2027-01-24';
 
-  var EXERCISES = {
+  // DEFAULT_EXERCISES + EXTRA_LIBRARY_EXERCISES seed a brand-new user's Plan
+  // and Exercise Library the first time they log in. Shared exercises (e.g.
+  // Lat Pulldown, Plank, Cable Crunch) use ONE canonical id across days so
+  // history/PRs stay unified. "Either/or" pairs are split into two separate
+  // library exercises; only one of each pair is defaulted onto a day, the
+  // other sits in the library ready to swap in via the Plan tab.
+  var DEFAULT_EXERCISES = {
     monday: {
-      label:'Back + Biceps',
+      label:'Back + Biceps', weekday:1,
       warmup:'Band pull-aparts ×15 · scapular pull-ups ×10 · cat-cow · arm circles',
       cooldown:'Lat stretch · doorway chest stretch · child\'s pose',
       list:[
-        {id:'m_lat_pulldown', name:'Lat Pulldown', sets:3, target:'10', type:'weight', suggested:'Challenging by rep 8 — pull-up builder'},
+        {id:'ex_lat_pulldown', name:'Lat Pulldown', sets:3, target:'10', type:'weight', suggested:'Challenging by rep 8 — pull-up builder'},
         {id:'m_cable_row', name:'Seated Cable Row', sets:3, target:'10', type:'weight', suggested:'Challenging by rep 8'},
         {id:'m_bent_row', name:'Bent-Over DB Row', sets:3, target:'10/side', type:'weight', suggested:'12–15 lb'},
         {id:'m_face_pull', name:'Face Pulls', sets:3, target:'12', type:'weight', suggested:'Light–moderate'},
         {id:'m_bicep_curl', name:'DB Bicep Curl', sets:3, target:'12', type:'weight', suggested:'2×10–12 lb'},
         {id:'m_hammer_curl', name:'Hammer Curl', sets:3, target:'12', type:'weight', suggested:'2×10–12 lb'},
-        {id:'m_hanging_knee_raise', name:'Hanging Knee Raise / Cable Crunch', sets:3, target:'12–15', type:'reps', suggested:'Ab work'},
+        {id:'ex_hanging_knee_raise', name:'Hanging Knee Raise', sets:3, target:'12–15', type:'reps', suggested:'Ab work — alternate with Cable Crunch'},
         {id:'m_side_plank', name:'Side Plank', sets:2, target:'30s/side', type:'time', suggested:'Bodyweight'}
       ]
     },
     tuesday: {
-      label:'Chest, Triceps & Shoulders',
+      label:'Chest, Triceps & Shoulders', weekday:2,
       warmup:'Arm circles · band pull-aparts ×15 · light cardio',
       cooldown:'Chest doorway stretch · tricep overhead stretch · child\'s pose',
       list:[
@@ -221,25 +258,25 @@
         {id:'t_tricep_pushdown', name:'Tricep Pushdown', sets:3, target:'12', type:'weight', suggested:'Challenging by rep 10'},
         {id:'t_tricep_ext', name:'Overhead Tricep Extension', sets:3, target:'12', type:'weight', suggested:'1×12–15 lb'},
         {id:'t_lateral_raise', name:'Lateral Raise', sets:3, target:'12', type:'weight', suggested:'2×5–8 lb'},
-        {id:'t_plank', name:'Plank / Cable Woodchopper', sets:3, target:'30–45s or 10/side', type:'time', suggested:'Rotational core for arm-drive'}
+        {id:'ex_plank', name:'Plank', sets:3, target:'30–45s', type:'time', suggested:'Bodyweight — alternate with Cable Woodchopper'}
       ]
     },
     wednesday: {
-      label:'Shoulders, Lats, Lower Back & Core',
+      label:'Shoulders, Lats, Lower Back & Core', weekday:3,
       warmup:'5 min row/bike · cat-cow · thoracic rotations · shoulder rolls',
       cooldown:'Child\'s pose · seated spinal twist · lat stretch',
       list:[
         {id:'w_shoulder_press', name:'DB Shoulder Press', sets:3, target:'10', type:'weight', suggested:'2×8–10 lb'},
         {id:'w_arnold_press', name:'Arnold Press', sets:3, target:'10', type:'weight', suggested:'2×8–10 lb'},
-        {id:'w_lat_pulldown', name:'Lat Pulldown', sets:3, target:'10', type:'weight', suggested:'Challenging by rep 8'},
+        {id:'ex_lat_pulldown', name:'Lat Pulldown', sets:3, target:'10', type:'weight', suggested:'Challenging by rep 8'},
         {id:'w_hyperextension', name:'Hyperextension', sets:3, target:'12', type:'weight', suggested:'Bodyweight → hold a plate'},
         {id:'w_incline_crunch', name:'Incline Crunches', sets:3, target:'15', type:'reps', suggested:'Bodyweight'},
-        {id:'w_reverse_crunch', name:'Reverse Crunch / Leg Raise', sets:3, target:'12', type:'reps', suggested:'Lower abs'},
-        {id:'w_plank', name:'Plank', sets:3, target:'30–45s', type:'time', suggested:'Bodyweight'}
+        {id:'ex_reverse_crunch', name:'Reverse Crunch', sets:3, target:'12', type:'reps', suggested:'Lower abs — alternate with Leg Raise'},
+        {id:'ex_plank', name:'Plank', sets:3, target:'30–45s', type:'time', suggested:'Bodyweight'}
       ]
     },
     thursday: {
-      label:'Legs + Running Stability',
+      label:'Legs + Running Stability', weekday:4,
       warmup:'Hip circles · leg swings · bodyweight squats ×10 · ankle mobility',
       cooldown:'Quad stretch · hamstring stretch · figure-4 stretch · foam roll IT band/calves',
       list:[
@@ -247,47 +284,88 @@
         {id:'h_leg_press', name:'Leg Press', sets:3, target:'10', type:'weight', suggested:'Challenging by rep 8'},
         {id:'h_leg_extension', name:'Leg Extension', sets:3, target:'12', type:'weight', suggested:'Moderate'},
         {id:'h_leg_curl', name:'Leg Curl', sets:3, target:'12', type:'weight', suggested:'Moderate'},
-        {id:'h_abductor_adductor', name:'Abductor / Adductor (alternate weekly)', sets:3, target:'15', type:'weight', suggested:'Hip stability for injury prevention'},
+        {id:'ex_abductor', name:'Abductor Machine', sets:3, target:'15', type:'weight', suggested:'Hip stability — alternate with Adductor'},
         {id:'h_calf_raise', name:'Standing Calf Raise', sets:3, target:'15', type:'weight', suggested:'Bodyweight or DBs'},
-        {id:'h_single_leg_rdl', name:'Single-Leg RDL / Step-Up', sets:3, target:'8/leg', type:'weight', suggested:'Bodyweight or light DB — single-leg running strength'},
-        {id:'h_ab_work', name:'Cable Crunch / Decline Sit-Up', sets:3, target:'15', type:'reps', suggested:'Bodyweight or light plate'}
+        {id:'ex_single_leg_rdl', name:'Single-Leg RDL', sets:3, target:'8/leg', type:'weight', suggested:'Bodyweight or light DB — alternate with Step-Up'},
+        {id:'ex_decline_situp', name:'Decline Sit-Up', sets:3, target:'15', type:'reps', suggested:'Bodyweight or light plate — alternate with Cable Crunch'}
+      ]
+    },
+    saturday: {
+      label:'Post-Run Yoga Flow', weekday:6,
+      note:'Post-run flow — move slowly and breathe deeply through each hold, don\'t force any stretch.',
+      list:[
+        {id:'sa_childs_pose', name:"Child's Pose", target:'1 min', type:'check', suggested:'Settle the breath before you move'},
+        {id:'sa_dog_cobra', name:'Downward Dog → Cobra Flow', target:'5 rounds', type:'check', suggested:'Slow, controlled transitions'},
+        {id:'sa_low_lunge', name:'Low Lunge (hip flexor stretch)', target:'1 min/side', type:'check', suggested:'Sink hips forward gently'},
+        {id:'sa_pigeon', name:'Pigeon Pose', target:'1.5 min/side', type:'check', suggested:'Glute/hip opener — key for runners'},
+        {id:'sa_forward_fold', name:'Seated Forward Fold', target:'1 min', type:'check', suggested:'Let the hamstrings release'},
+        {id:'sa_figure4', name:'Reclined Figure-4 Stretch', target:'1 min/side', type:'check', suggested:'Piriformis/IT band relief'},
+        {id:'ex_spinal_twist', name:'Supine Spinal Twist', target:'1 min/side', type:'check', suggested:'Low back release'},
+        {id:'ex_legs_up_wall', name:'Legs-Up-The-Wall', target:'5 min', type:'check', suggested:'Circulation reset'},
+        {id:'sa_savasana', name:'Savasana', target:'2 min', type:'check', suggested:'Full-body rest'}
+      ]
+    },
+    sunday: {
+      label:'Restorative Recovery Flow', weekday:0,
+      note:'Restorative recovery after your long run — nothing here should feel like effort.',
+      list:[
+        {id:'su_foam_roll', name:'Foam Roll: calves, quads, IT band, glutes', target:'1 min each', type:'check', suggested:'Go slow over tender spots'},
+        {id:'su_calf_stretch', name:'Standing Calf Stretch', target:'1 min/side', type:'check', suggested:'Wall or step'},
+        {id:'su_hip_flexor', name:'Half-Kneeling Hip Flexor Stretch', target:'1 min/side', type:'check', suggested:'Tuck pelvis slightly'},
+        {id:'su_wide_fold', name:'Wide-Legged Forward Fold', target:'1.5 min', type:'check', suggested:'Hamstrings/inner thigh'},
+        {id:'su_happy_baby', name:'Happy Baby Pose', target:'1 min', type:'check', suggested:'Hip/low back release'},
+        {id:'su_figure4', name:'Supine Figure-4 Stretch', target:'1 min/side', type:'check', suggested:'Glute/piriformis'},
+        {id:'ex_spinal_twist', name:'Supine Spinal Twist', target:'1 min/side', type:'check', suggested:'Low back release'},
+        {id:'ex_legs_up_wall', name:'Legs-Up-The-Wall', target:'5 min', type:'check', suggested:'Circulation reset'},
+        {id:'su_savasana', name:'Savasana + 4-7-8 breathing', target:'3 min', type:'check', suggested:'Nervous system down-shift'}
       ]
     }
   };
 
-  var DAY_ORDER = ['monday','tuesday','wednesday','thursday'];
-  var DAY_TAB = {monday:{d:'MON',s:'Back + Bi'}, tuesday:{d:'TUE',s:'Chest/Tri'}, wednesday:{d:'WED',s:'Shldr/Core'}, thursday:{d:'THU',s:'Legs'}};
+  // Exists in the library from day one, but not defaulted onto any day —
+  // available immediately as a swap-in via the Plan tab's typeahead.
+  var EXTRA_LIBRARY_EXERCISES = [
+    {id:'ex_cable_crunch', name:'Cable Crunch', sets:3, target:'12–15', type:'reps', suggested:'Ab work'},
+    {id:'ex_cable_woodchopper', name:'Cable Woodchopper', sets:3, target:'10/side', type:'weight', suggested:'Light–moderate — rotational core for arm-drive'},
+    {id:'ex_leg_raise', name:'Leg Raise', sets:3, target:'12', type:'reps', suggested:'Lower abs'},
+    {id:'ex_adductor', name:'Adductor Machine', sets:3, target:'15', type:'weight', suggested:'Hip stability — alternate with Abductor'},
+    {id:'ex_step_up', name:'Step-Up', sets:3, target:'8/leg', type:'weight', suggested:'2×10 lb DB — alternate with Single-Leg RDL'}
+  ];
 
   var PUSHUP_STAGES = ['Wall push-up','High incline push-up','Low incline push-up','Knee push-up','Full push-up (unassisted)'];
   var PULLUP_STAGES = ['Dead hang, 20s','Band-assisted pull-up (heavy band)','Band-assisted pull-up (light band)','Negative pull-up (5s slow lower)','Full pull-up (unassisted)'];
 
   var configOk = firebaseConfig.apiKey && firebaseConfig.apiKey.indexOf('PASTE_') !== 0;
+  var sdkLoadError = false;
   var app, auth, db;
   if(configOk){
-    app = firebase.initializeApp(firebaseConfig);
-    auth = firebase.auth();
-    db = firebase.firestore();
+    try{
+      if(typeof firebase === 'undefined'){ throw new Error('Firebase SDK did not load.'); }
+      app = firebase.initializeApp(firebaseConfig);
+      auth = firebase.auth();
+      db = firebase.firestore();
+    }catch(e){
+      sdkLoadError = true;
+    }
   }
 
   var data = null;
-  var view = 'log';
-  var activeDay = defaultDay();
+  var view = 'log'; // 'log' | 'milestones' | 'plan'
+  var activeDay = null;
   var activeDate = todayISO();
   var authChecked = false;
   var currentUser = null;
-  var authMode = 'login'; // 'login' | 'signup'
+  var authMode = 'login';
   var authError = '';
   var authBusy = false;
+  var planUI = { expandedDay: null, addingExercise: false, addMode: 'library', editingEx: null };
+  var planDraft = null;
+  var planDirty = false;
 
   function todayISO(){
     var d = new Date();
     var local = new Date(d.getTime() - d.getTimezoneOffset()*60000);
     return local.toISOString().slice(0,10);
-  }
-  function defaultDay(){
-    var idx = new Date().getDay();
-    var map = {1:'monday',2:'tuesday',3:'wednesday',4:'thursday'};
-    return map[idx] || 'monday';
   }
   function fmtDate(iso){
     var d = new Date(iso+'T00:00:00');
@@ -299,15 +377,93 @@
     var nowMid = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     return Math.ceil((target - nowMid)/86400000);
   }
+  function genId(prefix){
+    return (prefix||'id') + '_' + Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+  }
+  function escAttr(s){
+    return (s==null?'':String(s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+  function typeLabel(t){
+    return {weight:'Weight',time:'Timed',reps:'Reps',check:'Checklist'}[t] || t;
+  }
+  function typeOptionsHTML(current){
+    var types = [['weight','Weight × Reps'],['time','Timed (seconds)'],['reps','Bodyweight Reps'],['check','Checklist (yoga/mobility)']];
+    return types.map(function(t){ return '<option value="'+t[0]+'" '+(t[0]===current?'selected':'')+'>'+t[1]+'</option>'; }).join('');
+  }
+  function shortTabCode(day){
+    var WD = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
+    if(day.weekday !== null && day.weekday !== undefined) return WD[day.weekday];
+    return (day.label||'DAY').slice(0,3).toUpperCase();
+  }
+  function sortedLibraryEntries(library, excludeIds, query){
+    var q = (query||'').trim().toLowerCase();
+    var exclude = excludeIds || [];
+    return Object.keys(library)
+      .filter(function(id){ return exclude.indexOf(id)===-1; })
+      .map(function(id){ return {id:id, def:library[id]}; })
+      .filter(function(it){ return !q || it.def.name.toLowerCase().indexOf(q) !== -1; })
+      .sort(function(a,b){ return a.def.name.localeCompare(b.def.name); });
+  }
+
+  function buildPlanFromDefaults(){
+    var order = [], days = {}, library = {};
+    Object.keys(DEFAULT_EXERCISES).forEach(function(key){
+      var d = DEFAULT_EXERCISES[key];
+      order.push(key);
+      var ids = [];
+      d.list.forEach(function(ex){
+        library[ex.id] = {name:ex.name, type:ex.type, sets:ex.sets||1, target:ex.target, suggested:ex.suggested||''};
+        ids.push(ex.id);
+      });
+      days[key] = {label:d.label, weekday:(d.weekday!==undefined?d.weekday:null), warmup:d.warmup||'', cooldown:d.cooldown||'', note:d.note||'', exerciseIds:ids};
+    });
+    EXTRA_LIBRARY_EXERCISES.forEach(function(ex){
+      if(!library[ex.id]) library[ex.id] = {name:ex.name, type:ex.type, sets:ex.sets||1, target:ex.target, suggested:ex.suggested||''};
+    });
+    return {plan:{order:order, days:days}, library:library};
+  }
+
   function defaultData(){
-    return {sessions:{}, milestones:{pushup:{}, pullup:{}}, prs:[]};
+    var seeded = buildPlanFromDefaults();
+    return {plan:seeded.plan, library:seeded.library, sessions:{}, milestones:{pushup:{}, pullup:{}}, prs:[]};
+  }
+
+  function getDay(dayKey){ return data.plan.days[dayKey]; }
+  function getDraftDay(dayKey){ return planDraft.plan.days[dayKey]; }
+  function exObj(exId){
+    var def = data.library[exId];
+    if(!def) return null;
+    return {id:exId, name:def.name, type:def.type, sets:def.sets, target:def.target, suggested:def.suggested};
+  }
+  function computeDefaultDay(){
+    var idx = new Date().getDay();
+    var found = data.plan.order.find(function(k){ return data.plan.days[k].weekday === idx; });
+    return found || data.plan.order[0] || null;
+  }
+  function cloneForDraft(){
+    return {
+      plan: JSON.parse(JSON.stringify(data.plan)),
+      library: JSON.parse(JSON.stringify(data.library))
+    };
+  }
+  function ensureDraft(){
+    if(!planDraft) planDraft = cloneForDraft();
   }
 
   async function loadData(){
     try{
       var doc = await db.collection('users').doc(currentUser.uid).collection('journal').doc('data').get();
-      if(doc.exists && doc.data().payload) return JSON.parse(doc.data().payload);
-      return defaultData();
+      var d = (doc.exists && doc.data().payload) ? JSON.parse(doc.data().payload) : null;
+      if(!d) return defaultData();
+      if(!d.plan || !d.library){
+        var seeded = buildPlanFromDefaults();
+        d.plan = d.plan || seeded.plan;
+        d.library = d.library || seeded.library;
+      }
+      if(!d.milestones) d.milestones = {pushup:{}, pullup:{}};
+      if(!d.prs) d.prs = [];
+      if(!d.sessions) d.sessions = {};
+      return d;
     }catch(e){
       return defaultData();
     }
@@ -327,19 +483,21 @@
 
   function sessionKey(date, day){ return date + '__' + day; }
 
-  function allSessionsForDayExercise(day, exId){
+  // History/PRs are tracked globally per exercise (not scoped to a single
+  // day) — the same exercise done on two different days shares one history.
+  function allSessionsForExercise(exId){
     var out = [];
     for(var key in data.sessions){
       var s = data.sessions[key];
-      if(s.day === day && s.exercises && s.exercises[exId]){
-        out.push({date:s.date, entry:s.exercises[exId]});
+      if(s.exercises && s.exercises[exId]){
+        out.push({date:s.date, day:s.day, entry:s.exercises[exId]});
       }
     }
     out.sort(function(a,b){ return a.date < b.date ? 1 : -1; });
     return out;
   }
-  function bestWeight(day, exId){
-    var hist = allSessionsForDayExercise(day, exId);
+  function bestWeight(exId){
+    var hist = allSessionsForExercise(exId);
     var best = 0;
     hist.forEach(function(h){
       (h.entry.sets||[]).forEach(function(s){ if(s.weight && s.weight > best) best = s.weight; });
@@ -373,11 +531,38 @@
       '<button class="remove-set" type="button" aria-label="Remove set" onclick="this.parentElement.remove()">✕</button></div>';
   }
 
-  function renderExerciseCard(ex, day, date){
-    var hist = allSessionsForDayExercise(day, ex.id);
-    var last = hist.find(function(h){ return h.date !== date; }) || null;
-    var best = bestWeight(day, ex.id);
-    var curKey = sessionKey(date, day);
+  function dayContextNote(entryDay){
+    if(!entryDay || entryDay===activeDay) return '';
+    var d = data.plan.days[entryDay];
+    return d ? ' · '+shortTabCode(d) : '';
+  }
+
+  function renderCheckCard(ex, date){
+    var hist = allSessionsForExercise(ex.id);
+    var last = hist.find(function(h){ return !(h.date === date && h.day === activeDay); }) || null;
+    var curKey = sessionKey(date, activeDay);
+    var existing = data.sessions[curKey] && data.sessions[curKey].exercises[ex.id];
+    var checked = existing ? !!existing.done : false;
+
+    var refHTML = '';
+    if(last) refHTML = '<div class="ex-ref"><span>Last (' + fmtDate(last.date) + dayContextNote(last.day) + '): <b>' + (last.entry.done?'Done':'Skipped') + '</b></span></div>';
+
+    return '<div class="ex-card" id="card-'+ex.id+'" data-exid="'+ex.id+'" data-type="check">'+
+      '<div class="ex-head"><span class="ex-name">'+escAttr(ex.name)+'</span><span class="ex-target">'+escAttr(ex.target)+'</span></div>'+
+      '<div class="ex-suggested">'+escAttr(ex.suggested)+'</div>'+
+      refHTML+
+      '<label class="check-row"><input type="checkbox" id="chk-'+ex.id+'" '+(checked?'checked':'')+'><span>Completed</span></label>'+
+      '<input type="text" class="notes-input" id="notes-'+ex.id+'" placeholder="Notes (optional)" value="'+((existing&&existing.notes)?escAttr(existing.notes):'')+'" style="margin-top:8px;">'+
+    '</div>';
+  }
+
+  function renderExerciseCard(ex, date){
+    if(ex.type === 'check') return renderCheckCard(ex, date);
+
+    var hist = allSessionsForExercise(ex.id);
+    var last = hist.find(function(h){ return !(h.date === date && h.day === activeDay); }) || null;
+    var best = bestWeight(ex.id);
+    var curKey = sessionKey(date, activeDay);
     var existing = data.sessions[curKey] && data.sessions[curKey].exercises[ex.id];
 
     var rowsHTML = '';
@@ -388,40 +573,50 @@
     }
 
     var refHTML = '<div class="ex-ref">';
-    if(last) refHTML += '<span>Last (' + fmtDate(last.date) + '): <b>' + summarizeSets(ex, last.entry.sets) + '</b></span>';
+    if(last) refHTML += '<span>Last (' + fmtDate(last.date) + dayContextNote(last.day) + '): <b>' + summarizeSets(ex, last.entry.sets) + '</b></span>';
     if(best>0) refHTML += '<span>Best: <b>'+best+' lb</b></span>';
     if(!last && !best) refHTML = '<div class="ex-ref"><span style="color:var(--text-muted)">First time logging this one — set your baseline.</span>';
     refHTML += '</div>';
 
     return '<div class="ex-card" id="card-'+ex.id+'" data-exid="'+ex.id+'" data-type="'+ex.type+'">'+
-      '<div class="ex-head"><span class="ex-name">'+ex.name+'</span><span class="ex-target">'+ex.sets+'×'+ex.target+'</span></div>'+
-      '<div class="ex-suggested">'+ex.suggested+'</div>'+
+      '<div class="ex-head"><span class="ex-name">'+escAttr(ex.name)+'</span><span class="ex-target">'+ex.sets+'×'+escAttr(ex.target)+'</span></div>'+
+      '<div class="ex-suggested">'+escAttr(ex.suggested)+'</div>'+
       refHTML+
       '<div class="sets-container" id="sets-'+ex.id+'">'+rowsHTML+'</div>'+
       '<button type="button" class="add-set" onclick="App.addSet(\''+ex.id+'\')">+ Add set</button>'+
-      '<input type="text" class="notes-input" id="notes-'+ex.id+'" placeholder="Notes (optional)" value="'+((existing&&existing.notes)?existing.notes.replace(/"/g,'&quot;'):'')+'">'+
+      '<input type="text" class="notes-input" id="notes-'+ex.id+'" placeholder="Notes (optional)" value="'+((existing&&existing.notes)?escAttr(existing.notes):'')+'">'+
     '</div>';
   }
 
   function renderLogView(){
-    var day = EXERCISES[activeDay];
+    if(!activeDay || !data.plan.days[activeDay]) activeDay = computeDefaultDay();
+    if(!activeDay){
+      return '<div class="empty-state">You don\'t have any days in your plan yet. Head to the Plan tab to add one.</div>';
+    }
+    var day = getDay(activeDay);
     var html = '';
 
     html += '<div class="tabs">';
-    DAY_ORDER.forEach(function(d){
-      var t = DAY_TAB[d];
-      html += '<div class="tab'+(d===activeDay?' active':'')+'" onclick="App.setDay(\''+d+'\')"><span class="d">'+t.d+'</span><span class="s">'+t.s+'</span></div>';
+    data.plan.order.forEach(function(d){
+      var dd = getDay(d);
+      html += '<div class="tab'+(d===activeDay?' active':'')+'" onclick="App.setDay(\''+d+'\')"><span class="d">'+shortTabCode(dd)+'</span><span class="s">'+escAttr(dd.label)+'</span></div>';
     });
     html += '</div>';
 
     html += '<div class="date-row">Logging for <input type="date" id="dateInput" value="'+activeDate+'" onchange="App.setDate(this.value)"></div>';
-    html += '<div class="info-card"><b>Warm-up:</b> '+day.warmup+'</div>';
+    if(day.warmup) html += '<div class="info-card"><b>Warm-up:</b> '+escAttr(day.warmup)+'</div>';
+    if(day.note) html += '<div class="info-card">'+escAttr(day.note)+'</div>';
 
-    day.list.forEach(function(ex){
-      html += renderExerciseCard(ex, activeDay, activeDate);
+    if(!day.exerciseIds.length){
+      html += '<div class="empty-state">No exercises on this day yet — add some from the Plan tab.</div>';
+    }
+    day.exerciseIds.forEach(function(exId){
+      var ex = exObj(exId);
+      if(!ex) return;
+      html += renderExerciseCard(ex, activeDate);
     });
 
-    html += '<div class="info-card"><b>Cool-down:</b> '+day.cooldown+'</div>';
+    if(day.cooldown) html += '<div class="info-card"><b>Cool-down:</b> '+escAttr(day.cooldown)+'</div>';
     html += '<div class="save-bar"><button class="save-btn" onclick="App.saveDay()">Save Workout</button>'+
       '<button class="backup-btn" onclick="App.showBackup()">Show as text (backup)</button>'+
       '<div class="toast" id="toast"></div><div id="backupBox"></div></div>';
@@ -450,18 +645,156 @@
     });
     html += '</div>';
 
-    html += '<div class="pr-wall"><div class="milestone-title">PR Wall</div><div class="milestone-sub">Auto-logged whenever you beat a previous weight.</div>';
+    html += '<div class="pr-wall"><div class="milestone-title">PR Wall</div><div class="milestone-sub">Auto-logged whenever you beat a previous weight. Stays here even if you later remove or rename the exercise.</div>';
     var prs = (data.prs||[]).slice().sort(function(a,b){ return a.date<b.date?1:-1; });
     if(!prs.length){
       html += '<div class="empty-state">No PRs yet — log a heavier set to start your wall.</div>';
     } else {
       prs.forEach(function(p){
-        html += '<div class="pr-item"><span>'+p.exName+'</span><span class="w">'+p.weight+' lb <span class="dt">· '+fmtDate(p.date)+'</span></span></div>';
+        html += '<div class="pr-item"><span>'+escAttr(p.exName)+'</span><span class="w">'+p.weight+' lb <span class="dt">· '+fmtDate(p.date)+'</span></span></div>';
       });
     }
     html += '</div>';
 
     html += '<button class="reset-btn" onclick="App.resetAll()">Clear all journal data</button>';
+    return html;
+  }
+
+  function renderExerciseEditForm(exId, def){
+    var html = '<div class="plan-ex-edit-form">';
+    html += '<div class="auth-field"><label>Name</label><input type="text" id="editExName" value="'+escAttr(def.name)+'" onchange="App.updateExerciseField(\''+exId+'\',\'name\',this.value)"></div>';
+    html += '<div class="auth-field"><label>Type</label><select id="editExType" onchange="App.updateExerciseField(\''+exId+'\',\'type\',this.value)">'+typeOptionsHTML(def.type)+'</select></div>';
+    html += '<div class="auth-field"><label>Sets</label><input type="number" id="editExSets" value="'+(def.sets||3)+'" onchange="App.updateExerciseField(\''+exId+'\',\'sets\',this.value)"></div>';
+    html += '<div class="auth-field"><label>Target (reps/duration)</label><input type="text" id="editExTarget" value="'+escAttr(def.target)+'" onchange="App.updateExerciseField(\''+exId+'\',\'target\',this.value)"></div>';
+    html += '<div class="auth-field"><label>Suggested / notes</label><input type="text" id="editExSuggested" value="'+escAttr(def.suggested||'')+'" onchange="App.updateExerciseField(\''+exId+'\',\'suggested\',this.value)"></div>';
+    html += '<button class="done-btn" onclick="App.cancelEditExercise()">Done</button>';
+    html += '<div class="plan-hint">Editing here updates this exercise everywhere it appears on your plan — its history and PRs stay linked to it. Changes are staged until you hit "Save Plan Changes" below.</div>';
+    html += '</div>';
+    return html;
+  }
+
+  function renderAddExerciseForm(dayKey){
+    var html = '<div class="plan-ex-edit-form">';
+    html += '<div class="view-switch" style="margin-bottom:12px;">';
+    html += '<button class="'+(planUI.addMode==='library'?'active':'')+'" onclick="App.setAddMode(\'library\')">From Library</button>';
+    html += '<button class="'+(planUI.addMode==='new'?'active':'')+'" onclick="App.setAddMode(\'new\')">New Exercise</button>';
+    html += '</div>';
+
+    if(planUI.addMode === 'library'){
+      html += '<input type="text" class="typeahead-input" id="libSearch-'+dayKey+'" placeholder="Type to search your library…" autocomplete="off" oninput="App.filterLibrary(\''+dayKey+'\', this.value)">';
+      html += '<div class="typeahead-list" id="librarySuggestions-'+dayKey+'">'+renderTypeaheadSuggestions(dayKey, '')+'</div>';
+    } else {
+      html += '<div class="auth-field"><label>Name</label><input type="text" id="newExName" placeholder="e.g. Cable Fly" autocomplete="off" oninput="App.checkNewExerciseName(\''+dayKey+'\', this.value)"></div>';
+      html += '<div id="newExMatches"></div>';
+      html += '<div class="auth-field"><label>Type</label><select id="newExType">'+typeOptionsHTML('weight')+'</select></div>';
+      html += '<div class="auth-field"><label>Sets</label><input type="number" id="newExSets" value="3"></div>';
+      html += '<div class="auth-field"><label>Target (reps/duration)</label><input type="text" id="newExTarget" placeholder="e.g. 10 or 30s"></div>';
+      html += '<div class="auth-field"><label>Suggested / notes</label><input type="text" id="newExSuggested" placeholder="Optional"></div>';
+      html += '<button class="done-btn" onclick="App.addNewExercise(\''+dayKey+'\')">Create & Add</button>';
+    }
+    html += '<button class="icon-btn" onclick="App.cancelAddExercise()">Cancel</button>';
+    html += '</div>';
+    return html;
+  }
+
+  function renderTypeaheadSuggestions(dayKey, query){
+    var dayIds = getDraftDay(dayKey).exerciseIds;
+    var items = sortedLibraryEntries(planDraft.library, dayIds, query);
+    if(!items.length){
+      return '<div class="typeahead-empty">'+(query? 'No matches — try "New Exercise" instead.' : 'No other saved exercises available.')+'</div>';
+    }
+    return items.map(function(it){
+      return '<div class="typeahead-item" onclick="App.addExistingExercise(\''+dayKey+'\',\''+it.id+'\')">'+
+        '<span>'+escAttr(it.def.name)+'</span><span class="typeahead-meta">'+typeLabel(it.def.type)+'</span></div>';
+    }).join('');
+  }
+
+  function renderNewExerciseMatches(dayKey, query){
+    var q = (query||'').trim().toLowerCase();
+    if(!q) return '';
+    var matches = sortedLibraryEntries(planDraft.library, [], query);
+    if(!matches.length) return '';
+    var html = '<div class="typeahead-warning">Already in your library — tap to use instead of creating a duplicate:</div>';
+    html += '<div class="typeahead-list">' + matches.map(function(it){
+      return '<div class="typeahead-item" onclick="App.useExistingInstead(\''+dayKey+'\',\''+it.id+'\')">'+
+        '<span>'+escAttr(it.def.name)+'</span><span class="typeahead-meta">'+typeLabel(it.def.type)+'</span></div>';
+    }).join('') + '</div>';
+    return html;
+  }
+
+  function renderDayEditor(dayKey, day){
+    var wdLabels = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+    var html = '<div class="plan-day-body">';
+    html += '<div class="auth-field"><label>Day Name</label><input type="text" id="planLabel-'+dayKey+'" value="'+escAttr(day.label)+'" onchange="App.updateDayField(\''+dayKey+'\',\'label\',this.value)"></div>';
+    html += '<div class="auth-field"><label>Auto-select on</label><select id="planWeekday-'+dayKey+'" onchange="App.updateDayField(\''+dayKey+'\',\'weekday\',this.value)"><option value="">None</option>';
+    wdLabels.forEach(function(w,i){
+      html += '<option value="'+i+'" '+(day.weekday===i?'selected':'')+'>'+w+'</option>';
+    });
+    html += '</select></div>';
+    html += '<div class="auth-field"><label>Warm-up</label><input type="text" id="planWarmup-'+dayKey+'" value="'+escAttr(day.warmup||'')+'" placeholder="Optional" onchange="App.updateDayField(\''+dayKey+'\',\'warmup\',this.value)"></div>';
+    html += '<div class="auth-field"><label>Cool-down</label><input type="text" id="planCooldown-'+dayKey+'" value="'+escAttr(day.cooldown||'')+'" placeholder="Optional" onchange="App.updateDayField(\''+dayKey+'\',\'cooldown\',this.value)"></div>';
+    html += '<div class="auth-field"><label>Note (shown instead of warm-up/cool-down — e.g. for mobility days)</label><input type="text" id="planNote-'+dayKey+'" value="'+escAttr(day.note||'')+'" placeholder="Optional" onchange="App.updateDayField(\''+dayKey+'\',\'note\',this.value)"></div>';
+
+    html += '<div class="plan-ex-list">';
+    day.exerciseIds.forEach(function(exId, i){
+      var def = planDraft.library[exId];
+      if(!def) return;
+      html += '<div class="plan-ex-row">';
+      html += '<div class="plan-ex-info"><span class="plan-ex-name">'+escAttr(def.name)+'</span><span class="plan-ex-meta">'+typeLabel(def.type)+' · '+(def.type==='check'? escAttr(def.target) : def.sets+'×'+escAttr(def.target))+'</span></div>';
+      html += '<div class="plan-ex-actions">';
+      html += '<button class="icon-btn" '+(i===0?'disabled':'')+' onclick="App.moveExercise(\''+dayKey+'\','+i+',-1)">▲</button>';
+      html += '<button class="icon-btn" '+(i===day.exerciseIds.length-1?'disabled':'')+' onclick="App.moveExercise(\''+dayKey+'\','+i+',1)">▼</button>';
+      html += '<button class="icon-btn" onclick="App.editExercise(\''+exId+'\')">Edit</button>';
+      html += '<button class="icon-btn danger" onclick="App.removeExerciseFromDay(\''+dayKey+'\',\''+exId+'\')">Remove</button>';
+      html += '</div></div>';
+      if(planUI.editingEx === exId){
+        html += renderExerciseEditForm(exId, def);
+      }
+    });
+    html += '</div>';
+
+    if(planUI.addingExercise === dayKey){
+      html += renderAddExerciseForm(dayKey);
+    } else {
+      html += '<button class="add-ex-btn" onclick="App.startAddExercise(\''+dayKey+'\')">+ Add Exercise</button>';
+    }
+
+    html += '</div>';
+    return html;
+  }
+
+  function renderPlanEditor(){
+    ensureDraft();
+    var html = '';
+    html += '<div class="info-card">Add, reorder, or remove days and exercises here. Removing something only takes it off your active plan — history and PRs stay safe and come right back if you re-add it from your library. Nothing here takes effect until you hit "Save Plan Changes" below.</div>';
+
+    planDraft.plan.order.forEach(function(dayKey, idx){
+      var day = getDraftDay(dayKey);
+      var expanded = planUI.expandedDay === dayKey;
+      html += '<div class="plan-day-card">';
+      html += '<div class="plan-day-head">';
+      html += '<div class="plan-day-title">'+escAttr(day.label)+'<span class="plan-day-count">'+day.exerciseIds.length+' exercises</span></div>';
+      html += '<div class="plan-day-actions">';
+      html += '<button class="icon-btn" '+(idx===0?'disabled':'')+' onclick="App.moveDay(\''+dayKey+'\',-1)">▲</button>';
+      html += '<button class="icon-btn" '+(idx===planDraft.plan.order.length-1?'disabled':'')+' onclick="App.moveDay(\''+dayKey+'\',1)">▼</button>';
+      html += '<button class="icon-btn" onclick="App.toggleExpandDay(\''+dayKey+'\')">'+(expanded?'Close':'Edit')+'</button>';
+      html += '<button class="icon-btn danger" onclick="App.deleteDay(\''+dayKey+'\')">Delete</button>';
+      html += '</div></div>';
+      if(expanded) html += renderDayEditor(dayKey, day);
+      html += '</div>';
+    });
+
+    html += '<button class="add-day-btn" onclick="App.addDay()">+ Add Day</button>';
+
+    html += '<div class="save-bar">';
+    if(planDirty){
+      html += '<button class="save-btn" onclick="App.savePlan()">Save Plan Changes</button>';
+      html += '<button class="backup-btn" onclick="App.discardPlan()">Discard Changes</button>';
+    } else {
+      html += '<button class="save-btn" disabled>✓ All Changes Saved</button>';
+    }
+    html += '<div class="toast" id="planToast"></div></div>';
+
     return html;
   }
 
@@ -481,10 +814,19 @@
 
   function renderSetupWarning(){
     return '<div class="auth-wrap"><div class="eyebrow">Strength × Marathon × Wedding</div><div class="app-title" style="margin-bottom:20px;">Training Log</div>'+
-      '<div class="setup-warning">⚠️ <b>Firebase isn\'t configured yet.</b><br><br>Open this file, find the <code>firebaseConfig</code> object near the top of the script, and paste in your project\'s config values from the Firebase Console. Full steps are in the chat where this file was shared.</div></div>';
+      '<div class="setup-warning">⚠️ <b>Firebase isn\'t configured yet.</b><br><br>Open this file, find the <code>firebaseConfig</code> object near the top of the script, and paste in your project\'s config values from the Firebase Console.</div></div>';
+  }
+
+  function renderSdkErrorScreen(){
+    return '<div class="auth-wrap"><div class="eyebrow">Strength × Marathon × Wedding</div><div class="app-title" style="margin-bottom:20px;">Training Log</div>'+
+      '<div class="setup-warning">⚠️ <b>The Firebase SDK couldn\'t load.</b><br><br>This usually happens when the page is opened as a local file instead of a real web address. Host this file (e.g. via GitHub Pages) and open it through that <code>https://</code> link, then reload. If it\'s already hosted, check your internet connection and try again.</div></div>';
   }
 
   function render(){
+    if(sdkLoadError){
+      document.getElementById('app').innerHTML = renderSdkErrorScreen();
+      return;
+    }
     if(!configOk){
       document.getElementById('app').innerHTML = renderSetupWarning();
       return;
@@ -530,16 +872,17 @@
 
     html += '<div class="stat-row">'+
       '<div class="stat-chip"><div class="n">'+sessionCount+'</div><div class="l">Logged</div></div>'+
-      '<div class="stat-chip"><div class="n">'+thisWeek+'/4</div><div class="l">This week</div></div>'+
+      '<div class="stat-chip"><div class="n">'+thisWeek+'/'+data.plan.order.length+'</div><div class="l">This week</div></div>'+
       '<div class="stat-chip"><div class="n">'+(data.prs||[]).length+'</div><div class="l">PRs</div></div>'+
     '</div>';
 
     html += '<div class="view-switch">'+
-      '<button class="'+(view==='log'?'active':'')+'" onclick="App.setView(\'log\')">Workout Log</button>'+
-      '<button class="'+(view==='milestones'?'active':'')+'" onclick="App.setView(\'milestones\')">Milestones & PRs</button>'+
+      '<button class="'+(view==='log'?'active':'')+'" onclick="App.setView(\'log\')">Log</button>'+
+      '<button class="'+(view==='milestones'?'active':'')+'" onclick="App.setView(\'milestones\')">Milestones</button>'+
+      '<button class="'+(view==='plan'?'active':'')+'" onclick="App.setView(\'plan\')">Plan'+(planDirty?' •':'')+'</button>'+
     '</div>';
 
-    html += view==='log' ? renderLogView() : renderMilestones();
+    html += view==='log' ? renderLogView() : (view==='milestones' ? renderMilestones() : renderPlanEditor());
 
     document.getElementById('app').innerHTML = html;
   }
@@ -569,10 +912,21 @@
   window.App = {
     setDay: function(d){ activeDay = d; view='log'; render(); },
     setDate: function(v){ activeDate = v; render(); },
-    setView: function(v){ view = v; render(); },
+    setView: function(v){
+      if(v === view){ return; }
+      if(view === 'plan' && planDirty){
+        if(!confirm('You have unsaved plan changes. Leave without saving? Your edits will be lost.')) return;
+      }
+      if(v === 'plan'){
+        planDraft = cloneForDraft();
+        planDirty = false;
+        planUI = {expandedDay:null, addingExercise:false, addMode:'library', editingEx:null};
+      }
+      view = v;
+      render();
+    },
     addSet: function(exId){
-      var day = EXERCISES[activeDay];
-      var ex = day.list.find(function(e){ return e.id===exId; });
+      var ex = exObj(exId);
       var container = document.getElementById('sets-'+exId);
       var idx = container.querySelectorAll('.set-row').length;
       container.insertAdjacentHTML('beforeend', setRowHTML(ex, idx, null));
@@ -583,20 +937,31 @@
       render();
     },
     saveDay: function(){
-      var day = EXERCISES[activeDay];
+      var day = getDay(activeDay);
       var key = sessionKey(activeDate, activeDay);
       var exercisesOut = {};
       var newPRs = [];
 
-      day.list.forEach(function(ex){
-        var sets = gatherSets(ex);
+      day.exerciseIds.forEach(function(exId){
+        var ex = exObj(exId);
+        if(!ex) return;
         var notesEl = document.getElementById('notes-'+ex.id);
         var notes = notesEl ? notesEl.value : '';
+
+        if(ex.type === 'check'){
+          var chkEl = document.getElementById('chk-'+ex.id);
+          var done = chkEl ? chkEl.checked : false;
+          if(!done && !notes) return;
+          exercisesOut[ex.id] = {done: done, notes: notes};
+          return;
+        }
+
+        var sets = gatherSets(ex);
         if(sets.length === 0 && !notes) return;
         exercisesOut[ex.id] = {sets: sets, notes: notes};
 
         if(ex.type==='weight' && sets.length){
-          var prevBest = bestWeight(activeDay, ex.id);
+          var prevBest = bestWeight(ex.id);
           var newMax = 0;
           sets.forEach(function(s){ if(s.weight && s.weight>newMax) newMax = s.weight; });
           if(prevBest>0 && newMax>prevBest){
@@ -627,12 +992,21 @@
       });
     },
     showBackup: function(){
-      var day = EXERCISES[activeDay];
-      var lines = ['Workout — ' + DAY_TAB[activeDay].d + ' ' + activeDate, ''];
-      day.list.forEach(function(ex){
-        var sets = gatherSets(ex);
+      var day = getDay(activeDay);
+      var lines = ['Workout — ' + shortTabCode(day) + ' ' + activeDate, ''];
+      day.exerciseIds.forEach(function(exId){
+        var ex = exObj(exId);
+        if(!ex) return;
         var notesEl = document.getElementById('notes-'+ex.id);
         var notes = notesEl ? notesEl.value : '';
+        if(ex.type === 'check'){
+          var chkEl = document.getElementById('chk-'+ex.id);
+          var done = chkEl ? chkEl.checked : false;
+          if(!done && !notes) return;
+          lines.push(ex.name + ': ' + (done?'Done':'Not done') + (notes ? ' — ' + notes : ''));
+          return;
+        }
+        var sets = gatherSets(ex);
         if(!sets.length && !notes) return;
         lines.push(ex.name + ': ' + summarizeSets(ex, sets) + (notes ? ' — ' + notes : ''));
       });
@@ -646,8 +1020,161 @@
     resetAll: function(){
       if(!confirm('This will permanently delete all logged workouts, milestones, and PRs. Continue?')) return;
       data = defaultData();
-      persist().then(function(){ render(); });
+      persist().then(function(){ activeDay = computeDefaultDay(); render(); });
     },
+
+    // ---- Plan editor actions (operate on the staged draft) ----
+    toggleExpandDay: function(dayKey){
+      ensureDraft();
+      planUI.expandedDay = planUI.expandedDay===dayKey ? null : dayKey;
+      planUI.addingExercise = false;
+      planUI.editingEx = null;
+      render();
+    },
+    moveDay: function(dayKey, dir){
+      ensureDraft();
+      var order = planDraft.plan.order;
+      var i = order.indexOf(dayKey);
+      var j = i+dir;
+      if(j<0||j>=order.length) return;
+      var tmp = order[i]; order[i]=order[j]; order[j]=tmp;
+      planDirty = true; render();
+    },
+    deleteDay: function(dayKey){
+      ensureDraft();
+      var day = getDraftDay(dayKey);
+      if(!confirm('Remove "'+day.label+'" from your plan? This can still be undone by discarding changes below before you save.')) return;
+      planDraft.plan.order = planDraft.plan.order.filter(function(k){ return k!==dayKey; });
+      delete planDraft.plan.days[dayKey];
+      if(planUI.expandedDay===dayKey) planUI.expandedDay=null;
+      planDirty = true; render();
+    },
+    addDay: function(){
+      ensureDraft();
+      var key = genId('day');
+      planDraft.plan.days[key] = {label:'New Day', weekday:null, warmup:'', cooldown:'', note:'', exerciseIds:[]};
+      planDraft.plan.order.push(key);
+      planUI.expandedDay = key;
+      planDirty = true; render();
+    },
+    updateDayField: function(dayKey, field, value){
+      ensureDraft();
+      var day = getDraftDay(dayKey);
+      if(field === 'weekday'){
+        day.weekday = value===''? null : parseInt(value,10);
+      } else if(field === 'label'){
+        day.label = (value||'').trim() || day.label;
+      } else {
+        day[field] = value;
+      }
+      planDirty = true;
+      render();
+    },
+    moveExercise: function(dayKey, idx, dir){
+      ensureDraft();
+      var day = getDraftDay(dayKey);
+      var j = idx+dir;
+      if(j<0||j>=day.exerciseIds.length) return;
+      var tmp = day.exerciseIds[idx]; day.exerciseIds[idx]=day.exerciseIds[j]; day.exerciseIds[j]=tmp;
+      planDirty = true; render();
+    },
+    startAddExercise: function(dayKey){
+      ensureDraft();
+      planUI.addingExercise = dayKey; planUI.addMode='library'; planUI.editingEx=null; render();
+    },
+    cancelAddExercise: function(){ planUI.addingExercise=false; render(); },
+    setAddMode: function(mode){ planUI.addMode = mode; render(); },
+    filterLibrary: function(dayKey, query){
+      var box = document.getElementById('librarySuggestions-'+dayKey);
+      if(box) box.innerHTML = renderTypeaheadSuggestions(dayKey, query);
+    },
+    checkNewExerciseName: function(dayKey, query){
+      var box = document.getElementById('newExMatches');
+      if(box) box.innerHTML = renderNewExerciseMatches(dayKey, query);
+    },
+    addExistingExercise: function(dayKey, exId){
+      ensureDraft();
+      var day = getDraftDay(dayKey);
+      if(day.exerciseIds.indexOf(exId)===-1) day.exerciseIds.push(exId);
+      planUI.addingExercise=false;
+      planDirty = true; render();
+    },
+    useExistingInstead: function(dayKey, exId){
+      ensureDraft();
+      var day = getDraftDay(dayKey);
+      if(day.exerciseIds.indexOf(exId)===-1) day.exerciseIds.push(exId);
+      planUI.addingExercise=false;
+      planDirty = true; render();
+    },
+    addNewExercise: function(dayKey){
+      ensureDraft();
+      var nameEl = document.getElementById('newExName');
+      var name = (nameEl.value||'').trim();
+      if(!name){ alert('Give it a name first.'); return; }
+      var dupId = Object.keys(planDraft.library).find(function(id){ return planDraft.library[id].name.toLowerCase() === name.toLowerCase(); });
+      if(dupId){
+        if(!confirm('"'+name+'" already exists in your library. Create a separate duplicate anyway?')) return;
+      }
+      var type = document.getElementById('newExType').value;
+      var sets = parseInt(document.getElementById('newExSets').value,10) || 3;
+      var target = (document.getElementById('newExTarget').value||'').trim() || (type==='check'?'1 min':'10');
+      var suggested = (document.getElementById('newExSuggested').value||'').trim();
+      var id = genId('ex');
+      planDraft.library[id] = {name:name, type:type, sets:sets, target:target, suggested:suggested};
+      getDraftDay(dayKey).exerciseIds.push(id);
+      planUI.addingExercise=false;
+      planDirty = true; render();
+    },
+    editExercise: function(exId){ planUI.editingEx = exId; planUI.addingExercise=false; render(); },
+    cancelEditExercise: function(){ planUI.editingEx=null; render(); },
+    updateExerciseField: function(exId, field, value){
+      ensureDraft();
+      var def = planDraft.library[exId];
+      if(field==='name') def.name = (value||'').trim() || def.name;
+      else if(field==='sets') def.sets = parseInt(value,10) || def.sets;
+      else def[field] = value;
+      planDirty = true;
+      render();
+    },
+    removeExerciseFromDay: function(dayKey, exId){
+      ensureDraft();
+      var def = planDraft.library[exId];
+      if(!confirm('Remove "'+(def?def.name:exId)+'" from this day? It stays in your library with full history — you can add it back anytime. (You can also discard all unsaved changes below before saving.)')) return;
+      var day = getDraftDay(dayKey);
+      day.exerciseIds = day.exerciseIds.filter(function(id){ return id!==exId; });
+      planDirty = true; render();
+    },
+    savePlan: function(){
+      data.plan = planDraft.plan;
+      data.library = planDraft.library;
+      (data.prs||[]).forEach(function(p){
+        if(data.library[p.exId]) p.exName = data.library[p.exId].name;
+      });
+      persist().then(function(result){
+        var toast = document.getElementById('planToast');
+        if(!result.ok){
+          if(toast){ toast.style.color='var(--bad)'; toast.textContent = "Couldn't save: "+result.error; }
+          return;
+        }
+        planDirty = false;
+        if(!activeDay || !data.plan.days[activeDay]) activeDay = computeDefaultDay();
+        render();
+        var t = document.getElementById('planToast');
+        if(t){ t.style.color='var(--good)'; t.textContent = 'Plan saved ✓'; }
+        setTimeout(function(){
+          var t2 = document.getElementById('planToast');
+          if(t2) t2.textContent = '';
+        }, 3000);
+      });
+    },
+    discardPlan: function(){
+      if(!confirm('Discard all unsaved plan changes?')) return;
+      planDraft = cloneForDraft();
+      planDirty = false;
+      planUI = {expandedDay:null, addingExercise:false, addMode:'library', editingEx:null};
+      render();
+    },
+
     toggleAuthMode: function(){
       authMode = authMode==='login' ? 'signup' : 'login';
       authError = '';
@@ -674,12 +1201,17 @@
     }
   };
 
-  if(configOk){
+  if(configOk && !sdkLoadError){
     auth.onAuthStateChanged(function(user){
       authChecked = true;
       currentUser = user;
       if(user){
-        loadData().then(function(d){ data = d; render(); });
+        loadData().then(function(d){
+          data = d;
+          if(!activeDay || !data.plan.days[activeDay]) activeDay = computeDefaultDay();
+          render();
+          persist();
+        });
       } else {
         data = null;
         render();
