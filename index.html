@@ -358,7 +358,7 @@
   var authMode = 'login';
   var authError = '';
   var authBusy = false;
-  var planUI = { expandedDay: null, addingExercise: false, addMode: 'library', editingEx: null };
+  var planUI = { expandedDay: null, addingExercise: false, addMode: 'library', editingEx: null, showLibrary: false, mergingEx: null };
   var planDraft = null;
   var planDirty = false;
 
@@ -443,7 +443,8 @@
   function cloneForDraft(){
     return {
       plan: JSON.parse(JSON.stringify(data.plan)),
-      library: JSON.parse(JSON.stringify(data.library))
+      library: JSON.parse(JSON.stringify(data.library)),
+      pendingMerges: []
     };
   }
   function ensureDraft(){
@@ -654,6 +655,8 @@
         html += '<div class="pr-item"><span>'+escAttr(p.exName)+'</span><span class="w">'+p.weight+' lb <span class="dt">· '+fmtDate(p.date)+'</span></span></div>';
       });
     }
+    html += '<button class="backup-btn" style="margin-top:10px;" onclick="App.rebuildPRs()">Rebuild PRs from History</button>';
+    html += '<div class="toast" id="milestoneToast"></div>';
     html += '</div>';
 
     html += '<button class="reset-btn" onclick="App.resetAll()">Clear all journal data</button>';
@@ -763,6 +766,53 @@
     return html;
   }
 
+  function renderMergeSuggestions(exId, query){
+    var items = sortedLibraryEntries(planDraft.library, [exId], query);
+    if(!items.length) return '<div class="typeahead-empty">No matches.</div>';
+    return items.map(function(it){
+      return '<div class="typeahead-item" onclick="App.confirmMerge(\''+exId+'\',\''+it.id+'\')">'+
+        '<span>'+escAttr(it.def.name)+'</span><span class="typeahead-meta">'+typeLabel(it.def.type)+'</span></div>';
+    }).join('');
+  }
+
+  function renderMergeForm(exId){
+    var def = planDraft.library[exId];
+    var html = '<div class="plan-ex-edit-form">';
+    html += '<div class="plan-hint" style="margin-bottom:8px;">Merge "'+escAttr(def.name)+'" into another exercise. Its logged history and PRs will combine into the one you pick below, and this entry will be removed once you save.</div>';
+    html += '<input type="text" class="typeahead-input" id="mergeSearch-'+exId+'" placeholder="Search for the exercise to merge into…" autocomplete="off" oninput="App.filterMergeTarget(\''+exId+'\', this.value)">';
+    html += '<div class="typeahead-list" id="mergeSuggestions-'+exId+'">'+renderMergeSuggestions(exId,'')+'</div>';
+    html += '<button class="icon-btn" onclick="App.cancelMerge()">Cancel</button>';
+    html += '</div>';
+    return html;
+  }
+
+  function renderLibrarySection(query){
+    var entries = sortedLibraryEntries(planDraft.library, [], query);
+    var total = Object.keys(planDraft.library).length;
+    var html = '<div class="plan-day-card">';
+    html += '<div class="plan-day-head" style="margin-bottom:8px;"><div class="plan-day-title">Exercise Library<span class="plan-day-count">'+total+' total</span></div>';
+    html += '<div class="plan-day-actions"><button class="icon-btn" onclick="App.toggleLibrarySection()">Hide</button></div></div>';
+    html += '<div class="plan-hint" style="margin-bottom:10px;">Every exercise you\'ve ever created lives here, even ones not on any day right now. <b>Merge</b> two entries that represent the same real exercise so their logged history combines. <b>Delete</b> removes an entry entirely — only its logged history stops being viewable, nothing else is affected.</div>';
+    html += '<input type="text" class="typeahead-input" id="libraryBrowseSearch" placeholder="Search your library…" autocomplete="off" oninput="App.filterLibraryBrowse(this.value)" value="'+escAttr(query||'')+'">';
+    html += '<div id="libraryBrowseList">';
+    if(!entries.length){
+      html += '<div class="typeahead-empty">No matches.</div>';
+    } else {
+      entries.forEach(function(it){
+        var usedOn = planDraft.plan.order.filter(function(dk){ return getDraftDay(dk).exerciseIds.indexOf(it.id)!==-1; }).map(function(dk){ return getDraftDay(dk).label; });
+        html += '<div class="plan-ex-row">';
+        html += '<div class="plan-ex-info"><span class="plan-ex-name">'+escAttr(it.def.name)+'</span><span class="plan-ex-meta">'+typeLabel(it.def.type)+(usedOn.length? ' · on '+usedOn.join(', ') : ' · not on any day')+'</span></div>';
+        html += '<div class="plan-ex-actions">';
+        html += '<button class="icon-btn" onclick="App.startMerge(\''+it.id+'\')">Merge</button>';
+        html += '<button class="icon-btn danger" onclick="App.deleteFromLibrary(\''+it.id+'\')">Delete</button>';
+        html += '</div></div>';
+        if(planUI.mergingEx === it.id) html += renderMergeForm(it.id);
+      });
+    }
+    html += '</div></div>';
+    return html;
+  }
+
   function renderPlanEditor(){
     ensureDraft();
     var html = '';
@@ -785,6 +835,12 @@
     });
 
     html += '<button class="add-day-btn" onclick="App.addDay()">+ Add Day</button>';
+
+    if(planUI.showLibrary){
+      html += renderLibrarySection('');
+    } else {
+      html += '<button class="add-ex-btn" onclick="App.toggleLibrarySection()">Show Exercise Library</button>';
+    }
 
     html += '<div class="save-bar">';
     if(planDirty){
@@ -853,8 +909,10 @@
       : (today < wDate ? 'Wedding Countdown — recomposition focus, go heavier' : 'Maintenance');
 
     var sessionCount = Object.keys(data.sessions).length;
-    var weekStart = new Date();
-    weekStart.setDate(weekStart.getDate() - weekStart.getDay() + 1);
+    var now2 = new Date();
+    var wd = now2.getDay(); // 0=Sun..6=Sat
+    var diffToMonday = (wd === 0) ? -6 : (1 - wd);
+    var weekStart = new Date(now2.getFullYear(), now2.getMonth(), now2.getDate() + diffToMonday);
     var weekStartISO = new Date(weekStart.getTime() - weekStart.getTimezoneOffset()*60000).toISOString().slice(0,10);
     var thisWeek = Object.values(data.sessions).filter(function(s){ return s.date >= weekStartISO; }).length;
 
@@ -920,7 +978,7 @@
       if(v === 'plan'){
         planDraft = cloneForDraft();
         planDirty = false;
-        planUI = {expandedDay:null, addingExercise:false, addMode:'library', editingEx:null};
+        planUI = {expandedDay:null, addingExercise:false, addMode:'library', editingEx:null, showLibrary:false, mergingEx:null};
       }
       view = v;
       render();
@@ -964,7 +1022,7 @@
           var prevBest = bestWeight(ex.id);
           var newMax = 0;
           sets.forEach(function(s){ if(s.weight && s.weight>newMax) newMax = s.weight; });
-          if(prevBest>0 && newMax>prevBest){
+          if(newMax>prevBest){
             data.prs = (data.prs||[]).filter(function(p){ return !(p.exId===ex.id && p.date===activeDate); });
             var pr = {exId:ex.id, exName:ex.name, weight:newMax, date:activeDate};
             data.prs.push(pr);
@@ -976,6 +1034,7 @@
       data.sessions[key] = {date: activeDate, day: activeDay, exercises: exercisesOut};
 
       persist().then(function(result){
+        render();
         var toast = document.getElementById('toast');
         if(!result.ok){
           if(toast){ toast.style.color = 'var(--bad)'; toast.textContent = "Couldn't save: " + result.error; }
@@ -984,7 +1043,6 @@
         var msg = 'Workout saved';
         if(newPRs.length) msg += ' · ' + newPRs.length + ' new PR' + (newPRs.length>1?'s':'') + ' 🎉';
         if(toast){ toast.style.color = 'var(--good)'; toast.textContent = msg; }
-        render();
         setTimeout(function(){
           var t = document.getElementById('toast');
           if(t) t.textContent = '';
@@ -1021,6 +1079,43 @@
       if(!confirm('This will permanently delete all logged workouts, milestones, and PRs. Continue?')) return;
       data = defaultData();
       persist().then(function(){ activeDay = computeDefaultDay(); render(); });
+    },
+    rebuildPRs: function(){
+      if(!confirm('Recalculate all PRs from your full logged history? This fills in any PRs missed by a past bug — it won\'t remove valid PRs, just recomputes everything from your actual logged sets.')) return;
+      var sessions = Object.values(data.sessions||{}).slice().sort(function(a,b){
+        return a.date < b.date ? -1 : (a.date > b.date ? 1 : 0);
+      });
+      var bestSoFar = {};
+      var rebuilt = [];
+      sessions.forEach(function(s){
+        Object.keys(s.exercises||{}).forEach(function(exId){
+          var entry = s.exercises[exId];
+          if(!entry.sets) return;
+          var maxInSession = 0;
+          entry.sets.forEach(function(set){ if(set.weight && set.weight > maxInSession) maxInSession = set.weight; });
+          if(maxInSession <= 0) return;
+          var prevBest = bestSoFar[exId] || 0;
+          if(maxInSession > prevBest){
+            bestSoFar[exId] = maxInSession;
+            var exName = data.library[exId] ? data.library[exId].name : exId;
+            rebuilt.push({exId:exId, exName:exName, weight:maxInSession, date:s.date});
+          }
+        });
+      });
+      data.prs = rebuilt;
+      persist().then(function(result){
+        render();
+        var toast = document.getElementById('milestoneToast');
+        if(!result.ok){
+          if(toast){ toast.style.color='var(--bad)'; toast.textContent = "Couldn't save: "+result.error; }
+          return;
+        }
+        if(toast){ toast.style.color='var(--good)'; toast.textContent = 'Rebuilt '+rebuilt.length+' PR'+(rebuilt.length===1?'':'s')+' from history ✓'; }
+        setTimeout(function(){
+          var t = document.getElementById('milestoneToast');
+          if(t) t.textContent = '';
+        }, 4000);
+      });
     },
 
     // ---- Plan editor actions (operate on the staged draft) ----
@@ -1144,9 +1239,108 @@
       day.exerciseIds = day.exerciseIds.filter(function(id){ return id!==exId; });
       planDirty = true; render();
     },
+    toggleLibrarySection: function(){
+      ensureDraft();
+      planUI.showLibrary = !planUI.showLibrary;
+      planUI.mergingEx = null;
+      render();
+    },
+    filterLibraryBrowse: function(query){
+      var box = document.getElementById('libraryBrowseList');
+      if(!box) return;
+      var entries = sortedLibraryEntries(planDraft.library, [], query);
+      if(!entries.length){
+        box.innerHTML = '<div class="typeahead-empty">No matches.</div>';
+        return;
+      }
+      var html = '';
+      entries.forEach(function(it){
+        var usedOn = planDraft.plan.order.filter(function(dk){ return getDraftDay(dk).exerciseIds.indexOf(it.id)!==-1; }).map(function(dk){ return getDraftDay(dk).label; });
+        html += '<div class="plan-ex-row">';
+        html += '<div class="plan-ex-info"><span class="plan-ex-name">'+escAttr(it.def.name)+'</span><span class="plan-ex-meta">'+typeLabel(it.def.type)+(usedOn.length? ' · on '+usedOn.join(', ') : ' · not on any day')+'</span></div>';
+        html += '<div class="plan-ex-actions">';
+        html += '<button class="icon-btn" onclick="App.startMerge(\''+it.id+'\')">Merge</button>';
+        html += '<button class="icon-btn danger" onclick="App.deleteFromLibrary(\''+it.id+'\')">Delete</button>';
+        html += '</div></div>';
+      });
+      box.innerHTML = html;
+      // Re-render fully on next tick isn't needed; merge/delete buttons call App methods that do full renders themselves.
+    },
+    startMerge: function(exId){
+      ensureDraft();
+      planUI.mergingEx = exId;
+      render();
+    },
+    cancelMerge: function(){ planUI.mergingEx = null; render(); },
+    filterMergeTarget: function(exId, query){
+      var box = document.getElementById('mergeSuggestions-'+exId);
+      if(box) box.innerHTML = renderMergeSuggestions(exId, query);
+    },
+    confirmMerge: function(removeId, keepId){
+      ensureDraft();
+      var removeDef = planDraft.library[removeId];
+      var keepDef = planDraft.library[keepId];
+      if(!confirm('Merge "'+removeDef.name+'" into "'+keepDef.name+'"? Their logged history and PRs will combine under "'+keepDef.name+'" once you save. This can\'t be undone after saving.')) return;
+      planDraft.plan.order.forEach(function(dk){
+        var day = planDraft.plan.days[dk];
+        var idx = day.exerciseIds.indexOf(removeId);
+        if(idx!==-1){
+          if(day.exerciseIds.indexOf(keepId)===-1){
+            day.exerciseIds[idx] = keepId;
+          } else {
+            day.exerciseIds.splice(idx,1);
+          }
+        }
+      });
+      delete planDraft.library[removeId];
+      planDraft.pendingMerges.push({removeId:removeId, keepId:keepId});
+      planUI.mergingEx = null;
+      planDirty = true;
+      render();
+    },
+    deleteFromLibrary: function(exId){
+      ensureDraft();
+      var def = planDraft.library[exId];
+      var usedOn = planDraft.plan.order.filter(function(dk){ return getDraftDay(dk).exerciseIds.indexOf(exId)!==-1; });
+      var msg = 'Permanently delete "'+(def?def.name:exId)+'" from your library?';
+      if(usedOn.length) msg += ' It will also be removed from '+usedOn.length+' day(s) on your plan.';
+      msg += ' Its logged history will no longer be viewable in the app once you save.';
+      if(!confirm(msg)) return;
+      planDraft.plan.order.forEach(function(dk){
+        var day = planDraft.plan.days[dk];
+        day.exerciseIds = day.exerciseIds.filter(function(id){ return id!==exId; });
+      });
+      delete planDraft.library[exId];
+      planDirty = true;
+      render();
+    },
     savePlan: function(){
       data.plan = planDraft.plan;
       data.library = planDraft.library;
+
+      (planDraft.pendingMerges||[]).forEach(function(m){
+        Object.keys(data.sessions).forEach(function(sk){
+          var s = data.sessions[sk];
+          if(s.exercises && s.exercises[m.removeId]){
+            if(!s.exercises[m.keepId]) s.exercises[m.keepId] = s.exercises[m.removeId];
+            delete s.exercises[m.removeId];
+          }
+        });
+        data.prs = (data.prs||[]).map(function(p){
+          if(p.exId === m.removeId){
+            p.exId = m.keepId;
+            p.exName = data.library[m.keepId] ? data.library[m.keepId].name : p.exName;
+          }
+          return p;
+        });
+        var seenBest = {};
+        data.prs = data.prs.filter(function(p){
+          var k = p.exId+'|'+p.date;
+          if(seenBest[k]===undefined || p.weight > seenBest[k]){ seenBest[k]=p.weight; return true; }
+          return false;
+        });
+      });
+
       (data.prs||[]).forEach(function(p){
         if(data.library[p.exId]) p.exName = data.library[p.exId].name;
       });
@@ -1171,7 +1365,7 @@
       if(!confirm('Discard all unsaved plan changes?')) return;
       planDraft = cloneForDraft();
       planDirty = false;
-      planUI = {expandedDay:null, addingExercise:false, addMode:'library', editingEx:null};
+      planUI = {expandedDay:null, addingExercise:false, addMode:'library', editingEx:null, showLibrary:false, mergingEx:null};
       render();
     },
 
