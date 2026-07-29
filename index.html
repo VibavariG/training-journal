@@ -5,24 +5,26 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
 <title>Training Log</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#12161c;
-    --panel:#1a2029;
-    --panel-2:#212938;
-    --border:#2a3240;
-    --text:#edede6;
-    --text-muted:#8891a0;
-    --gold:#e8a33d;
-    --gold-dim:#e8a33d33;
-    --teal:#4fb3a8;
-    --teal-dim:#4fb3a833;
-    --rose:#d98fa3;
-    --rose-dim:#d98fa333;
-    --good:#6fcf97;
-    --bad:#e0798a;
+    --bg:#F6F7F5;
+    --panel:#FFFFFF;
+    --panel-2:#F1F2EF;
+    --border:#E3E6E1;
+    --text:#20242A;
+    --text-muted:#767C77;
+    --gold:#B8863A;
+    --gold-dim:#B8863A17;
+    --accent:#2D6A4F;
+    --accent-dim:#2D6A4F14;
+    --accent2:#4A5FA8;
+    --accent2-dim:#4A5FA814;
+    --good:#2D6A4F;
+    --bad:#B8453A;
+    --bad-dim:#B8453A14;
     --radius:14px;
+    --shadow:0 1px 2px rgba(20,24,20,0.05), 0 1px 1px rgba(20,24,20,0.03);
   }
   *{box-sizing:border-box;}
   body{margin:0;}
@@ -33,113 +35,99 @@
     -webkit-font-smoothing:antialiased;
   }
   h1,h2,h3,.display{
-    font-family:'Oswald',sans-serif;
-    text-transform:uppercase;
-    letter-spacing:0.03em;
+    font-family:'Sora',sans-serif;
     margin:0;
   }
   .mono{font-family:'JetBrains Mono',monospace;}
-  #app{max-width:520px;margin:0 auto;padding:16px 14px 60px;}
+  #app{max-width:520px;margin:0 auto;padding:20px 16px 60px;}
 
-  .eyebrow{
-    font-family:'Oswald',sans-serif;
-    font-size:11px;
-    letter-spacing:0.22em;
-    color:var(--text-muted);
-    text-transform:uppercase;
-    margin-bottom:4px;
-  }
-  .app-title{font-size:26px;font-weight:600;color:var(--text);margin-bottom:4px;}
-  .account-line{font-size:11.5px;color:var(--text-muted);margin-bottom:16px;}
-  .account-line a{color:var(--gold);cursor:pointer;text-decoration:none;}
+  .app-title{font-family:'Sora',sans-serif;font-size:21px;font-weight:700;color:var(--text);margin-bottom:2px;}
+  .account-line{font-size:11.5px;color:var(--text-muted);margin-bottom:20px;}
+  .account-line a{color:var(--accent);cursor:pointer;text-decoration:none;font-weight:500;}
 
-  .bibs{display:flex;gap:10px;margin-bottom:12px;}
-  .bib{
-    flex:1;position:relative;background:var(--panel);border:2px dashed var(--border);
-    border-radius:10px;padding:14px 10px;text-align:center;overflow:hidden;
-  }
-  .bib::before,.bib::after{
-    content:'';position:absolute;top:6px;width:7px;height:7px;border-radius:50%;
-    background:var(--bg);border:1.5px solid var(--border);
-  }
-  .bib::before{left:6px;}
-  .bib::after{right:6px;}
-  .bib-teal{border-color:#2f5a55;}
-  .bib-rose{border-color:#5a3d45;}
-  .bib-label{font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:0.15em;color:var(--text-muted);text-transform:uppercase;margin-bottom:4px;}
-  .bib-number{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:34px;line-height:1;}
-  .bib-teal .bib-number{color:var(--teal);}
-  .bib-rose .bib-number{color:var(--rose);}
-  .bib-sub{font-size:10px;color:var(--text-muted);margin-top:4px;}
+  .goals-row{display:flex;gap:24px;margin-bottom:6px;align-items:flex-end;flex-wrap:wrap;}
+  .goal-item{min-width:80px;}
+  .goal-label{font-size:11px;color:var(--text-muted);margin-bottom:2px;letter-spacing:0.01em;}
+  .goal-number{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:30px;line-height:1;}
+  .goal-number .unit{font-size:12px;font-weight:500;color:var(--text-muted);margin-left:4px;}
+  .goal-tick{width:26px;height:3px;border-radius:2px;margin-top:6px;}
+  .goal-a .goal-number{color:var(--accent);}
+  .goal-a .goal-tick{background:var(--accent);}
+  .goal-b .goal-number{color:var(--accent2);}
+  .goal-b .goal-tick{background:var(--accent2);}
+  .goals-edit-link{font-size:11.5px;color:var(--text-muted);cursor:pointer;text-decoration:underline;margin-bottom:18px;display:inline-block;}
+  .goals-edit-link:hover{color:var(--accent);}
+  .goals-edit-panel{background:var(--panel-2);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:16px;}
+  .goal-edit-row{display:flex;gap:8px;margin-bottom:8px;align-items:center;}
+  .goal-edit-row input[type=text]{flex:1.3;background:var(--panel);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:9px 10px;font-size:13px;min-width:0;}
+  .goal-edit-row input[type=date]{flex:1;background:var(--panel);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:9px 8px;font-family:'JetBrains Mono',monospace;font-size:12px;min-width:0;}
+  .goal-remove-btn{background:none;border:none;color:var(--text-muted);font-size:16px;cursor:pointer;padding:4px 6px;line-height:1;flex-shrink:0;}
+  .add-goal-btn{background:none;border:1px dashed var(--border);color:var(--text-muted);border-radius:8px;padding:8px;font-size:12px;cursor:pointer;width:100%;margin-top:2px;}
+  .goals-empty{font-size:12.5px;color:var(--text-muted);margin-bottom:12px;}
 
-  .phase-banner{
-    background:var(--gold-dim);border:1px solid #6b4f22;color:var(--gold);border-radius:10px;
-    padding:8px 12px;font-size:12.5px;margin-bottom:10px;font-weight:500;
-  }
-  .stat-row{display:flex;gap:8px;margin-bottom:18px;}
-  .stat-chip{flex:1;background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:8px 10px;text-align:center;}
-  .stat-chip .n{font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;color:var(--text);}
-  .stat-chip .l{font-size:10px;color:var(--text-muted);letter-spacing:0.05em;text-transform:uppercase;}
+  .stat-line{font-size:12px;color:var(--text-muted);margin-bottom:20px;}
+  .stat-line b{color:var(--text);font-weight:600;}
+  .stat-line .dot{margin:0 6px;opacity:0.5;}
 
-  .view-switch{display:flex;background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:4px;margin-bottom:14px;}
+  .view-switch{display:flex;background:var(--panel-2);border-radius:11px;padding:3px;margin-bottom:18px;}
   .view-switch button{
     flex:1;padding:9px 0;border:none;background:transparent;color:var(--text-muted);
-    font-family:'Oswald',sans-serif;font-size:12.5px;letter-spacing:0.06em;text-transform:uppercase;
-    border-radius:9px;cursor:pointer;font-weight:500;
+    font-family:'Inter',sans-serif;font-size:12.5px;font-weight:600;
+    border-radius:8px;cursor:pointer;
   }
-  .view-switch button.active{background:var(--gold);color:#1a1204;}
+  .view-switch button.active{background:var(--panel);color:var(--accent);box-shadow:var(--shadow);}
 
-  .tabs{display:flex;gap:6px;margin-bottom:14px;overflow-x:auto;}
+  .tabs{display:flex;gap:6px;margin-bottom:16px;overflow-x:auto;}
   .tab{flex:1;min-width:76px;background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:8px 4px;text-align:center;cursor:pointer;color:var(--text-muted);}
-  .tab .d{font-family:'Oswald',sans-serif;font-weight:600;font-size:13px;letter-spacing:0.05em;}
-  .tab .s{font-size:9.5px;display:block;margin-top:1px;letter-spacing:0.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .tab.active{background:var(--gold-dim);border-color:var(--gold);color:var(--gold);}
+  .tab .d{font-weight:700;font-size:12.5px;letter-spacing:0.01em;}
+  .tab .s{font-size:9.5px;display:block;margin-top:1px;letter-spacing:0.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .tab.active{background:var(--accent-dim);border-color:var(--accent);color:var(--accent);}
 
-  .date-row{display:flex;align-items:center;gap:8px;margin-bottom:14px;color:var(--text-muted);font-size:12.5px;}
+  .date-row{display:flex;align-items:center;gap:8px;margin-bottom:16px;color:var(--text-muted);font-size:12.5px;}
   .date-row input[type=date]{background:var(--panel);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:6px 8px;font-family:'JetBrains Mono',monospace;font-size:12.5px;}
 
-  .info-card{background:var(--panel-2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;font-size:12px;color:var(--text-muted);margin-bottom:14px;line-height:1.5;}
+  .info-card{background:var(--panel-2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;font-size:11.5px;color:var(--text-muted);margin-bottom:12px;line-height:1.5;}
   .info-card b{color:var(--text);font-weight:600;}
 
-  .ex-card{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:12px;}
+  .ex-card{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:15px;margin-bottom:10px;box-shadow:var(--shadow);}
   .ex-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:2px;gap:8px;}
-  .ex-name{font-size:15.5px;font-weight:600;}
-  .ex-target{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--gold);white-space:nowrap;}
-  .ex-suggested{font-size:11.5px;color:var(--text-muted);margin-bottom:10px;}
+  .ex-name{font-size:15px;font-weight:600;}
+  .ex-target{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent);white-space:nowrap;}
+  .ex-suggested{font-size:11.5px;color:var(--text-muted);margin-bottom:10px;line-height:1.4;}
   .ex-ref{font-size:11px;color:var(--text-muted);margin-bottom:10px;display:flex;flex-wrap:wrap;gap:10px;}
-  .ex-ref span b{color:var(--teal);font-weight:600;}
+  .ex-ref span b{color:var(--accent);font-weight:600;}
 
   .set-row{display:grid;grid-template-columns:20px 1fr auto 1fr 22px;gap:6px;align-items:center;margin-bottom:6px;}
   .set-row.time,.set-row.reps{grid-template-columns:20px 1fr 22px;}
   .set-num{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-muted);text-align:center;}
   .set-row input{width:100%;background:var(--panel-2);border:1px solid var(--border);color:var(--text);border-radius:7px;padding:7px 6px;font-family:'JetBrains Mono',monospace;font-size:13px;text-align:center;}
-  .set-row input:focus{outline:2px solid var(--gold);outline-offset:1px;}
+  .set-row input:focus{outline:2px solid var(--accent);outline-offset:1px;}
   .set-row .x{color:var(--text-muted);text-align:center;font-size:12px;}
   .remove-set{background:none;border:none;color:var(--text-muted);font-size:13px;cursor:pointer;padding:2px;}
   .add-set{background:none;border:1px dashed var(--border);color:var(--text-muted);border-radius:7px;padding:6px 10px;font-size:11.5px;cursor:pointer;margin-top:2px;margin-bottom:10px;}
   .notes-input{width:100%;background:var(--panel-2);border:1px solid var(--border);color:var(--text);border-radius:7px;padding:8px 9px;font-size:12.5px;font-family:'Inter',sans-serif;}
   .check-row{display:flex;align-items:center;gap:10px;font-size:13.5px;cursor:pointer;padding:6px 0;color:var(--text);}
-  .check-row input[type=checkbox]{width:19px;height:19px;accent-color:var(--gold);flex-shrink:0;}
+  .check-row input[type=checkbox]{width:19px;height:19px;accent-color:var(--accent);flex-shrink:0;}
 
   .save-bar{position:sticky;bottom:10px;margin-top:6px;}
-  .save-btn{width:100%;background:var(--gold);color:#1a1204;border:none;border-radius:12px;padding:14px;font-family:'Oswald',sans-serif;font-size:14px;letter-spacing:0.06em;text-transform:uppercase;font-weight:600;cursor:pointer;}
+  .save-btn{width:100%;background:var(--accent);color:#fff;border:none;border-radius:12px;padding:14px;font-family:'Inter',sans-serif;font-size:14.5px;font-weight:600;cursor:pointer;box-shadow:var(--shadow);}
   .save-btn:active{transform:scale(0.99);}
   .save-btn:disabled{opacity:0.45;cursor:default;}
-  .backup-btn{width:100%;background:none;border:1px solid var(--border);color:var(--text-muted);border-radius:10px;padding:10px;font-size:12px;cursor:pointer;margin-top:8px;}
+  .backup-btn{width:100%;background:var(--panel);border:1px solid var(--border);color:var(--text-muted);border-radius:10px;padding:10px;font-size:12px;cursor:pointer;margin-top:8px;}
   .backup-textarea{width:100%;min-height:140px;margin-top:10px;background:var(--panel-2);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:10px;font-family:'JetBrains Mono',monospace;font-size:11.5px;}
-  .toast{text-align:center;font-size:12.5px;margin-top:8px;min-height:16px;}
+  .toast{text-align:center;font-size:12.5px;margin-top:8px;min-height:16px;font-weight:500;}
 
-  .milestone-block{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:14px;}
-  .milestone-title{font-size:14px;font-weight:600;margin-bottom:2px;}
+  .milestone-block{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:15px;margin-bottom:12px;box-shadow:var(--shadow);}
+  .milestone-title{font-size:14px;font-weight:700;margin-bottom:2px;}
   .milestone-sub{font-size:11.5px;color:var(--text-muted);margin-bottom:12px;}
   .stage{display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--border);}
   .stage:first-of-type{border-top:none;}
-  .stage input[type=checkbox]{width:18px;height:18px;accent-color:var(--gold);flex-shrink:0;}
+  .stage input[type=checkbox]{width:18px;height:18px;accent-color:var(--accent);flex-shrink:0;}
   .stage-label{flex:1;font-size:13px;}
   .stage-label.done{color:var(--good);}
   .stage-date{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--text-muted);}
 
-  .pr-wall{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:14px;}
+  .pr-wall{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:15px;margin-bottom:12px;box-shadow:var(--shadow);}
   .pr-item{display:flex;justify-content:space-between;padding:8px 0;border-top:1px solid var(--border);font-size:13px;}
   .pr-item:first-of-type{border-top:none;}
   .pr-item .w{font-family:'JetBrains Mono',monospace;color:var(--gold);font-weight:700;}
@@ -150,26 +138,26 @@
 
   .loading{text-align:center;color:var(--text-muted);padding:60px 0;font-size:13px;}
 
-  .auth-wrap{padding-top:40px;}
-  .auth-card{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:22px 18px;}
-  .auth-title{font-size:18px;font-weight:600;margin-bottom:4px;}
-  .auth-sub{font-size:12px;color:var(--text-muted);margin-bottom:18px;}
+  .auth-wrap{padding-top:48px;}
+  .auth-card{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:24px 20px;box-shadow:var(--shadow);}
+  .auth-title{font-family:'Sora',sans-serif;font-size:19px;font-weight:700;margin-bottom:4px;}
+  .auth-sub{font-size:12.5px;color:var(--text-muted);margin-bottom:20px;}
   .auth-field{margin-bottom:12px;}
-  .auth-field label{display:block;font-size:11px;color:var(--text-muted);margin-bottom:5px;letter-spacing:0.03em;text-transform:uppercase;}
-  .auth-field input, .auth-field select{width:100%;background:var(--panel-2);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:11px 10px;font-size:14px;}
-  .auth-error{background:var(--bad)22;border:1px solid var(--bad);color:var(--bad);border-radius:8px;padding:8px 10px;font-size:12px;margin-bottom:12px;}
-  .auth-btn{width:100%;background:var(--gold);color:#1a1204;border:none;border-radius:10px;padding:13px;font-family:'Oswald',sans-serif;font-size:13.5px;letter-spacing:0.06em;text-transform:uppercase;font-weight:600;cursor:pointer;margin-bottom:10px;}
+  .auth-field label{display:block;font-size:11px;color:var(--text-muted);margin-bottom:5px;font-weight:500;}
+  .auth-field input, .auth-field select{width:100%;background:var(--panel-2);border:1px solid var(--border);color:var(--text);border-radius:9px;padding:11px 10px;font-size:14px;}
+  .auth-error{background:var(--bad-dim);border:1px solid var(--bad);color:var(--bad);border-radius:9px;padding:9px 11px;font-size:12px;margin-bottom:12px;}
+  .auth-btn{width:100%;background:var(--accent);color:#fff;border:none;border-radius:10px;padding:13px;font-size:14px;font-weight:600;cursor:pointer;margin-bottom:12px;}
   .auth-toggle{text-align:center;font-size:12.5px;color:var(--text-muted);}
-  .auth-toggle a{color:var(--gold);cursor:pointer;text-decoration:none;font-weight:500;}
-  .setup-warning{background:var(--gold-dim);border:1px solid #6b4f22;color:var(--gold);border-radius:10px;padding:14px;font-size:12.5px;line-height:1.6;}
+  .auth-toggle a{color:var(--accent);cursor:pointer;text-decoration:none;font-weight:600;}
+  .setup-warning{background:var(--gold-dim);border:1px solid var(--gold);color:#8A6220;border-radius:10px;padding:14px;font-size:12.5px;line-height:1.6;}
 
-  .plan-day-card{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;margin-bottom:10px;}
+  .plan-day-card{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:13px 15px;margin-bottom:10px;box-shadow:var(--shadow);}
   .plan-day-head{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;}
   .plan-day-title{font-size:14.5px;font-weight:600;}
   .plan-day-count{font-size:11px;color:var(--text-muted);font-weight:400;margin-left:6px;}
   .plan-day-actions{display:flex;gap:5px;flex-shrink:0;}
   .icon-btn{background:var(--panel-2);border:1px solid var(--border);color:var(--text-muted);border-radius:7px;padding:5px 9px;font-size:11px;cursor:pointer;}
-  .icon-btn.danger{color:var(--bad);border-color:#5a2c33;}
+  .icon-btn.danger{color:var(--bad);border-color:#e2b8b3;}
   .icon-btn:disabled{opacity:0.35;cursor:default;}
   .plan-day-body{margin-top:12px;padding-top:12px;border-top:1px solid var(--border);}
   .plan-ex-list{margin-top:6px;}
@@ -181,7 +169,7 @@
   .plan-ex-actions{display:flex;gap:5px;flex-shrink:0;}
   .plan-ex-edit-form{background:var(--panel-2);border:1px solid var(--border);border-radius:10px;padding:12px;margin:8px 0;}
   .plan-hint{font-size:11px;color:var(--text-muted);margin-top:8px;line-height:1.5;}
-  .done-btn{background:var(--gold);color:#1a1204;border:none;border-radius:9px;padding:10px 14px;font-size:12px;font-weight:600;cursor:pointer;margin-top:4px;margin-right:6px;}
+  .done-btn{background:var(--accent);color:#fff;border:none;border-radius:9px;padding:10px 14px;font-size:12px;font-weight:600;cursor:pointer;margin-top:4px;margin-right:6px;}
   .add-day-btn, .add-ex-btn{width:100%;background:none;border:1px dashed var(--border);color:var(--text-muted);border-radius:10px;padding:11px;font-size:12.5px;cursor:pointer;margin-top:4px;}
   .plan-saved-indicator{text-align:center;font-size:12px;color:var(--good);padding:6px 0;}
 
@@ -189,13 +177,13 @@
   .typeahead-list{max-height:220px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;background:var(--panel-2);}
   .typeahead-item{display:flex;justify-content:space-between;gap:8px;padding:10px 11px;font-size:13px;cursor:pointer;border-top:1px solid var(--border);}
   .typeahead-item:first-child{border-top:none;}
-  .typeahead-item:active{background:var(--gold-dim);}
+  .typeahead-item:active{background:var(--accent-dim);}
   .typeahead-meta{color:var(--text-muted);font-size:11px;white-space:nowrap;}
   .typeahead-empty{padding:10px;font-size:12px;color:var(--text-muted);text-align:center;}
   .typeahead-warning{font-size:11px;color:var(--gold);margin:2px 0 6px;}
 
   @media (prefers-reduced-motion: no-preference){
-    .ex-card, .bib{transition:border-color .15s ease;}
+    .ex-card{transition:border-color .15s ease;}
   }
 </style>
 </head>
@@ -222,8 +210,12 @@
   };
   // =====================================================================
 
-  var MARATHON_DATE = '2026-11-01';
-  var WEDDING_DATE = '2027-01-24';
+  // Legacy defaults used only to migrate existing accounts that predate the
+  // customizable-goals feature, so their two current dates carry over as-is.
+  var LEGACY_GOALS = [
+    {id:'goal_1', label:'NYC Marathon', date:'2026-11-01'},
+    {id:'goal_2', label:'Wedding Day', date:'2027-01-24'}
+  ];
 
   // DEFAULT_EXERCISES + EXTRA_LIBRARY_EXERCISES seed a brand-new user's Plan
   // and Exercise Library the first time they log in. Shared exercises (e.g.
@@ -361,6 +353,7 @@
   var planUI = { expandedDay: null, addingExercise: false, addMode: 'library', editingEx: null, showLibrary: false, mergingEx: null };
   var planDraft = null;
   var planDirty = false;
+  var editingGoals = false;
 
   function todayISO(){
     var d = new Date();
@@ -425,7 +418,7 @@
 
   function defaultData(){
     var seeded = buildPlanFromDefaults();
-    return {plan:seeded.plan, library:seeded.library, sessions:{}, milestones:{pushup:{}, pullup:{}}, prs:[]};
+    return {plan:seeded.plan, library:seeded.library, sessions:{}, milestones:{pushup:{}, pullup:{}}, prs:[], goals:[]};
   }
 
   function getDay(dayKey){ return data.plan.days[dayKey]; }
@@ -464,6 +457,7 @@
       if(!d.milestones) d.milestones = {pushup:{}, pullup:{}};
       if(!d.prs) d.prs = [];
       if(!d.sessions) d.sessions = {};
+      if(!d.goals) d.goals = LEGACY_GOALS.slice();
       return d;
     }catch(e){
       return defaultData();
@@ -497,13 +491,25 @@
     out.sort(function(a,b){ return a.date < b.date ? 1 : -1; });
     return out;
   }
-  function bestWeight(exId){
+  function bestMetricValue(exId, type){
     var hist = allSessionsForExercise(exId);
     var best = 0;
     hist.forEach(function(h){
-      (h.entry.sets||[]).forEach(function(s){ if(s.weight && s.weight > best) best = s.weight; });
+      (h.entry.sets||[]).forEach(function(s){
+        var v = type==='weight' ? s.weight : (type==='time' ? s.seconds : s.reps);
+        if(v && v > best) best = v;
+      });
     });
     return best;
+  }
+  function prMetricType(p){ return p.type || 'weight'; }
+  function prMetricValue(p){ return p.value!=null ? p.value : p.weight; }
+  function prUnitSuffix(type){
+    return type==='time' ? 's' : (type==='reps' ? ' reps' : ' lb');
+  }
+  function prDisplayText(p){
+    var t = prMetricType(p);
+    return prMetricValue(p) + prUnitSuffix(t);
   }
 
   function summarizeSets(ex, sets){
@@ -562,7 +568,7 @@
 
     var hist = allSessionsForExercise(ex.id);
     var last = hist.find(function(h){ return !(h.date === date && h.day === activeDay); }) || null;
-    var best = bestWeight(ex.id);
+    var best = bestMetricValue(ex.id, ex.type);
     var curKey = sessionKey(date, activeDay);
     var existing = data.sessions[curKey] && data.sessions[curKey].exercises[ex.id];
 
@@ -575,7 +581,7 @@
 
     var refHTML = '<div class="ex-ref">';
     if(last) refHTML += '<span>Last (' + fmtDate(last.date) + dayContextNote(last.day) + '): <b>' + summarizeSets(ex, last.entry.sets) + '</b></span>';
-    if(best>0) refHTML += '<span>Best: <b>'+best+' lb</b></span>';
+    if(best>0) refHTML += '<span>Best: <b>'+best+prUnitSuffix(ex.type)+'</b></span>';
     if(!last && !best) refHTML = '<div class="ex-ref"><span style="color:var(--text-muted)">First time logging this one — set your baseline.</span>';
     refHTML += '</div>';
 
@@ -652,7 +658,7 @@
       html += '<div class="empty-state">No PRs yet — log a heavier set to start your wall.</div>';
     } else {
       prs.forEach(function(p){
-        html += '<div class="pr-item"><span>'+escAttr(p.exName)+'</span><span class="w">'+p.weight+' lb <span class="dt">· '+fmtDate(p.date)+'</span></span></div>';
+        html += '<div class="pr-item"><span>'+escAttr(p.exName)+'</span><span class="w">'+prDisplayText(p)+' <span class="dt">· '+fmtDate(p.date)+'</span></span></div>';
       });
     }
     html += '<button class="backup-btn" style="margin-top:10px;" onclick="App.rebuildPRs()">Rebuild PRs from History</button>';
@@ -855,7 +861,7 @@
   }
 
   function renderAuthScreen(){
-    var html = '<div class="auth-wrap"><div class="eyebrow">Strength × Marathon × Wedding</div><div class="app-title" style="margin-bottom:20px;">Training Log</div>';
+    var html = '<div class="auth-wrap"><div class="app-title" style="margin-bottom:20px;">Training Log</div>';
     html += '<div class="auth-card">';
     html += '<div class="auth-title">'+(authMode==='login'?'Log in':'Create your account')+'</div>';
     html += '<div class="auth-sub">'+(authMode==='login'?'Sign in to sync your journal across devices.':'One free account, usable on your phone and laptop.')+'</div>';
@@ -869,13 +875,57 @@
   }
 
   function renderSetupWarning(){
-    return '<div class="auth-wrap"><div class="eyebrow">Strength × Marathon × Wedding</div><div class="app-title" style="margin-bottom:20px;">Training Log</div>'+
+    return '<div class="auth-wrap"><div class="app-title" style="margin-bottom:20px;">Training Log</div>'+
       '<div class="setup-warning">⚠️ <b>Firebase isn\'t configured yet.</b><br><br>Open this file, find the <code>firebaseConfig</code> object near the top of the script, and paste in your project\'s config values from the Firebase Console.</div></div>';
   }
 
   function renderSdkErrorScreen(){
-    return '<div class="auth-wrap"><div class="eyebrow">Strength × Marathon × Wedding</div><div class="app-title" style="margin-bottom:20px;">Training Log</div>'+
+    return '<div class="auth-wrap"><div class="app-title" style="margin-bottom:20px;">Training Log</div>'+
       '<div class="setup-warning">⚠️ <b>The Firebase SDK couldn\'t load.</b><br><br>This usually happens when the page is opened as a local file instead of a real web address. Host this file (e.g. via GitHub Pages) and open it through that <code>https://</code> link, then reload. If it\'s already hosted, check your internet connection and try again.</div></div>';
+  }
+
+  function renderGoalsSection(){
+    var goals = data.goals || [];
+    var html = '';
+
+    if(editingGoals){
+      html += '<div class="goals-edit-panel">';
+      goals.forEach(function(g, i){
+        html += '<div class="goal-edit-row">';
+        html += '<input type="text" value="'+escAttr(g.label)+'" placeholder="Goal name" onchange="App.updateGoal(\''+g.id+'\',\'label\',this.value)">';
+        html += '<input type="date" value="'+escAttr(g.date)+'" onchange="App.updateGoal(\''+g.id+'\',\'date\',this.value)">';
+        html += '<button class="goal-remove-btn" onclick="App.removeGoal(\''+g.id+'\')" aria-label="Remove goal">✕</button>';
+        html += '</div>';
+      });
+      if(goals.length < 2){
+        html += '<button class="add-goal-btn" onclick="App.addGoal()">+ Add goal'+(goals.length?'':' (up to 2)')+'</button>';
+      }
+      html += '<div class="goals-edit-link" onclick="App.toggleGoalsEdit()" style="margin-top:10px;margin-bottom:0;">Done</div>';
+      html += '</div>';
+      return html;
+    }
+
+    if(!goals.length){
+      html += '<div class="goals-empty">No goals set yet.</div>';
+      html += '<div class="goals-edit-link" onclick="App.toggleGoalsEdit()">+ Add a goal to count down to</div>';
+      return html;
+    }
+
+    html += '<div class="goals-row">';
+    goals.forEach(function(g, i){
+      var days = daysUntil(g.date);
+      var cls = i===0 ? 'goal-a' : 'goal-b';
+      var d = new Date(g.date+'T00:00:00');
+      var dateLabel = d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+      html += '<div class="goal-item '+cls+'">';
+      html += '<div class="goal-label">'+escAttr(g.label)+'</div>';
+      html += '<div class="goal-number">'+days+'<span class="unit">'+(days===1?'day':'days')+'</span></div>';
+      html += '<div class="goal-tick"></div>';
+      html += '</div>';
+    });
+    html += '</div>';
+    html += '<div class="goals-edit-link" onclick="App.toggleGoalsEdit()">Edit goals</div>';
+    return html;
   }
 
   function render(){
@@ -900,14 +950,6 @@
       return;
     }
 
-    var marathonDays = daysUntil(MARATHON_DATE);
-    var weddingDays = daysUntil(WEDDING_DATE);
-    var today = new Date();
-    var mDate = new Date(MARATHON_DATE+'T00:00:00');
-    var wDate = new Date(WEDDING_DATE+'T00:00:00');
-    var phase = today < mDate ? 'Marathon Prep — protect the legs, build the base'
-      : (today < wDate ? 'Wedding Countdown — recomposition focus, go heavier' : 'Maintenance');
-
     var sessionCount = Object.keys(data.sessions).length;
     var now2 = new Date();
     var wd = now2.getDay(); // 0=Sun..6=Sat
@@ -917,21 +959,15 @@
     var thisWeek = Object.values(data.sessions).filter(function(s){ return s.date >= weekStartISO; }).length;
 
     var html = '';
-    html += '<div class="eyebrow">Strength × Marathon × Wedding</div>';
     html += '<div class="app-title">Training Log</div>';
     html += '<div class="account-line">'+currentUser.email+' · <a onclick="App.logout()">Sign out</a></div>';
 
-    html += '<div class="bibs">';
-    html += '<div class="bib bib-teal"><div class="bib-label">NYC Marathon</div><div class="bib-number">'+marathonDays+'</div><div class="bib-sub">days to go · Nov 1, 2026</div></div>';
-    html += '<div class="bib bib-rose"><div class="bib-label">Wedding Day</div><div class="bib-number">'+weddingDays+'</div><div class="bib-sub">days to go · Jan 24, 2027</div></div>';
-    html += '</div>';
+    html += renderGoalsSection();
 
-    html += '<div class="phase-banner">'+phase+'</div>';
-
-    html += '<div class="stat-row">'+
-      '<div class="stat-chip"><div class="n">'+sessionCount+'</div><div class="l">Logged</div></div>'+
-      '<div class="stat-chip"><div class="n">'+thisWeek+'/'+data.plan.order.length+'</div><div class="l">This week</div></div>'+
-      '<div class="stat-chip"><div class="n">'+(data.prs||[]).length+'</div><div class="l">PRs</div></div>'+
+    html += '<div class="stat-line">'+
+      '<b>'+sessionCount+'</b> logged<span class="dot">·</span>'+
+      '<b>'+thisWeek+'/'+data.plan.order.length+'</b> this week<span class="dot">·</span>'+
+      '<b>'+(data.prs||[]).length+'</b> PRs'+
     '</div>';
 
     html += '<div class="view-switch">'+
@@ -1018,13 +1054,16 @@
         if(sets.length === 0 && !notes) return;
         exercisesOut[ex.id] = {sets: sets, notes: notes};
 
-        if(ex.type==='weight' && sets.length){
-          var prevBest = bestWeight(ex.id);
+        if((ex.type==='weight' || ex.type==='time' || ex.type==='reps') && sets.length){
+          var prevBest = bestMetricValue(ex.id, ex.type);
           var newMax = 0;
-          sets.forEach(function(s){ if(s.weight && s.weight>newMax) newMax = s.weight; });
+          sets.forEach(function(s){
+            var v = ex.type==='weight' ? s.weight : (ex.type==='time' ? s.seconds : s.reps);
+            if(v && v>newMax) newMax = v;
+          });
           if(newMax>prevBest){
             data.prs = (data.prs||[]).filter(function(p){ return !(p.exId===ex.id && p.date===activeDate); });
-            var pr = {exId:ex.id, exName:ex.name, weight:newMax, date:activeDate};
+            var pr = {exId:ex.id, exName:ex.name, type:ex.type, value:newMax, date:activeDate};
             data.prs.push(pr);
             newPRs.push(pr);
           }
@@ -1091,14 +1130,20 @@
         Object.keys(s.exercises||{}).forEach(function(exId){
           var entry = s.exercises[exId];
           if(!entry.sets) return;
+          var def = data.library[exId];
+          var type = def ? def.type : 'weight';
+          if(type!=='weight' && type!=='time' && type!=='reps') return;
           var maxInSession = 0;
-          entry.sets.forEach(function(set){ if(set.weight && set.weight > maxInSession) maxInSession = set.weight; });
+          entry.sets.forEach(function(set){
+            var v = type==='weight' ? set.weight : (type==='time' ? set.seconds : set.reps);
+            if(v && v > maxInSession) maxInSession = v;
+          });
           if(maxInSession <= 0) return;
           var prevBest = bestSoFar[exId] || 0;
           if(maxInSession > prevBest){
             bestSoFar[exId] = maxInSession;
-            var exName = data.library[exId] ? data.library[exId].name : exId;
-            rebuilt.push({exId:exId, exName:exName, weight:maxInSession, date:s.date});
+            var exName = def ? def.name : exId;
+            rebuilt.push({exId:exId, exName:exName, type:type, value:maxInSession, date:s.date});
           }
         });
       });
@@ -1389,6 +1434,33 @@
       }).finally(function(){
         authBusy = false; render();
       });
+    },
+    toggleGoalsEdit: function(){
+      editingGoals = !editingGoals;
+      render();
+    },
+    updateGoal: function(id, field, value){
+      var g = (data.goals||[]).find(function(x){ return x.id===id; });
+      if(!g) return;
+      if(field==='label') g.label = (value||'').trim() || g.label;
+      else g.date = value;
+      persist();
+      render();
+    },
+    addGoal: function(){
+      if(!data.goals) data.goals = [];
+      if(data.goals.length >= 2) return;
+      var d = new Date();
+      d.setMonth(d.getMonth()+3);
+      var defaultDate = new Date(d.getTime() - d.getTimezoneOffset()*60000).toISOString().slice(0,10);
+      data.goals.push({id: genId('goal'), label:'New Goal', date: defaultDate});
+      persist();
+      render();
+    },
+    removeGoal: function(id){
+      data.goals = (data.goals||[]).filter(function(g){ return g.id!==id; });
+      persist();
+      render();
     },
     logout: function(){
       auth.signOut();
