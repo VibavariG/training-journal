@@ -182,6 +182,39 @@
   .typeahead-empty{padding:10px;font-size:12px;color:var(--text-muted);text-align:center;}
   .typeahead-warning{font-size:11px;color:var(--gold);margin:2px 0 6px;}
 
+  .header-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:2px;}
+  .hamburger-btn{background:none;border:1px solid var(--border);color:var(--text-muted);border-radius:9px;width:34px;height:34px;font-size:15px;cursor:pointer;flex-shrink:0;}
+  .ham-menu{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:6px;margin:8px 0 16px;box-shadow:var(--shadow);}
+  .ham-item{padding:11px 10px;font-size:13.5px;font-weight:500;color:var(--text);cursor:pointer;border-radius:8px;display:flex;align-items:center;gap:9px;}
+  .ham-item:active{background:var(--panel-2);}
+
+  .back-row{display:flex;align-items:center;gap:10px;margin-bottom:18px;}
+  .back-link{font-size:13px;color:var(--accent);cursor:pointer;font-weight:600;}
+  .back-title{font-family:'Sora',sans-serif;font-size:16px;font-weight:700;}
+
+  .cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;}
+  .cal-month-label{font-family:'Sora',sans-serif;font-size:15px;font-weight:700;}
+  .cal-summary{font-size:12px;color:var(--text-muted);margin-bottom:14px;}
+  .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:4px;}
+  .cal-weekdays{margin-bottom:6px;}
+  .cal-weekdays span{text-align:center;font-size:10.5px;color:var(--text-muted);font-weight:600;}
+  .cal-cell{aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:9px;cursor:pointer;position:relative;background:var(--panel);border:1px solid var(--border);}
+  .cal-cell.empty{background:none;border:none;cursor:default;}
+  .cal-daynum{font-size:12px;color:var(--text);}
+  .cal-cell.today{border-color:var(--accent);border-width:1.5px;}
+  .cal-cell.logged{border-color:transparent;}
+  .cal-cell.logged.light{background:var(--accent-dim);}
+  .cal-cell.logged.mid{background:#2D6A4F38;}
+  .cal-cell.logged.full{background:var(--accent);}
+  .cal-cell.logged.full .cal-daynum{color:#fff;font-weight:600;}
+  .cal-dot{display:none;}
+  .cal-legend{display:flex;align-items:center;gap:6px;margin-top:14px;font-size:10.5px;color:var(--text-muted);}
+  .cal-legend-swatch{width:12px;height:12px;border-radius:4px;}
+
+  .meas-row{display:flex;gap:8px;align-items:center;margin-bottom:8px;}
+  .meas-label-input{flex:1.4;background:var(--panel-2);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:9px 10px;font-size:13px;min-width:0;}
+  .meas-value-input{flex:1;background:var(--panel-2);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:9px 8px;font-family:'JetBrains Mono',monospace;font-size:13px;text-align:center;min-width:0;}
+
   @media (prefers-reduced-motion: no-preference){
     .ex-card{transition:border-color .15s ease;}
   }
@@ -217,6 +250,14 @@
     {id:'goal_2', label:'Wedding Day', date:'2027-01-24'}
   ];
 
+  var DEFAULT_MEASUREMENT_DEFS = [
+    {id:'m_waist', label:'Waist'},
+    {id:'m_hips', label:'Hips'},
+    {id:'m_thighs', label:'Thighs'},
+    {id:'m_chest', label:'Chest'},
+    {id:'m_arms', label:'Arms'}
+  ];
+
   // DEFAULT_EXERCISES + EXTRA_LIBRARY_EXERCISES seed a brand-new user's Plan
   // and Exercise Library the first time they log in. Shared exercises (e.g.
   // Lat Pulldown, Plank, Cable Crunch) use ONE canonical id across days so
@@ -246,7 +287,7 @@
       list:[
         {id:'t_chest_press', name:'DB Chest Press', sets:3, target:'10', type:'weight', suggested:'2×10–12 lb'},
         {id:'t_incline_press', name:'Incline DB Press', sets:3, target:'10', type:'weight', suggested:'2×8–10 lb'},
-        {id:'t_incline_pushup', name:'Incline Push-Up', sets:3, target:'AMRAP', type:'reps', suggested:'Lower the incline as you progress — push-up builder'},
+        {id:'t_incline_pushup', name:'Incline Push-Up', sets:3, target:'AMRAP', type:'incline', suggested:'Log reps × incline height — lower is harder, 0 = floor (full push-up)'},
         {id:'t_tricep_pushdown', name:'Tricep Pushdown', sets:3, target:'12', type:'weight', suggested:'Challenging by rep 10'},
         {id:'t_tricep_ext', name:'Overhead Tricep Extension', sets:3, target:'12', type:'weight', suggested:'1×12–15 lb'},
         {id:'t_lateral_raise', name:'Lateral Raise', sets:3, target:'12', type:'weight', suggested:'2×5–8 lb'},
@@ -354,6 +395,9 @@
   var planDraft = null;
   var planDirty = false;
   var editingGoals = false;
+  var menuOpen = false;
+  var calendarMonth = null;
+  var measDate = todayISO();
 
   function todayISO(){
     var d = new Date();
@@ -377,10 +421,10 @@
     return (s==null?'':String(s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
   function typeLabel(t){
-    return {weight:'Weight',time:'Timed',reps:'Reps',check:'Checklist'}[t] || t;
+    return {weight:'Weight',time:'Timed',reps:'Reps',incline:'Incline',check:'Checklist'}[t] || t;
   }
   function typeOptionsHTML(current){
-    var types = [['weight','Weight × Reps'],['time','Timed (seconds)'],['reps','Bodyweight Reps'],['check','Checklist (yoga/mobility)']];
+    var types = [['weight','Weight × Reps'],['time','Timed (seconds)'],['reps','Bodyweight Reps'],['incline','Incline height (lower = better)'],['check','Checklist (yoga/mobility)']];
     return types.map(function(t){ return '<option value="'+t[0]+'" '+(t[0]===current?'selected':'')+'>'+t[1]+'</option>'; }).join('');
   }
   function shortTabCode(day){
@@ -418,7 +462,7 @@
 
   function defaultData(){
     var seeded = buildPlanFromDefaults();
-    return {plan:seeded.plan, library:seeded.library, sessions:{}, milestones:{pushup:{}, pullup:{}}, prs:[], goals:[]};
+    return {plan:seeded.plan, library:seeded.library, sessions:{}, milestones:{pushup:{}, pullup:{}}, prs:[], goals:[], measurements:{unit:'in', defs: DEFAULT_MEASUREMENT_DEFS.slice(), entries:{}}};
   }
 
   function getDay(dayKey){ return data.plan.days[dayKey]; }
@@ -458,6 +502,7 @@
       if(!d.prs) d.prs = [];
       if(!d.sessions) d.sessions = {};
       if(!d.goals) d.goals = LEGACY_GOALS.slice();
+      if(!d.measurements) d.measurements = {unit:'in', defs: DEFAULT_MEASUREMENT_DEFS.slice(), entries:{}};
       return d;
     }catch(e){
       return defaultData();
@@ -502,20 +547,38 @@
     });
     return best;
   }
+  // Incline height: LOWER is better (0 = floor / full push-up), so it needs
+  // its own min-tracking logic and a null sentinel — 0 is a real, meaningful
+  // value here, unlike weight/time/reps where 0 always just means "no data".
+  function bestInclineHeight(exId){
+    var hist = allSessionsForExercise(exId);
+    var best = null;
+    hist.forEach(function(h){
+      (h.entry.sets||[]).forEach(function(s){
+        if(s.height!=null && s.reps>0){
+          if(best===null || s.height < best) best = s.height;
+        }
+      });
+    });
+    return best;
+  }
   function prMetricType(p){ return p.type || 'weight'; }
   function prMetricValue(p){ return p.value!=null ? p.value : p.weight; }
   function prUnitSuffix(type){
-    return type==='time' ? 's' : (type==='reps' ? ' reps' : ' lb');
+    return type==='time' ? 's' : (type==='reps' ? ' reps' : (type==='incline' ? '' : ' lb'));
   }
   function prDisplayText(p){
     var t = prMetricType(p);
-    return prMetricValue(p) + prUnitSuffix(t);
+    var v = prMetricValue(p);
+    if(t==='incline') return 'Height ' + v + (v===0 ? ' — floor! 🎉' : '');
+    return v + prUnitSuffix(t);
   }
 
   function summarizeSets(ex, sets){
     if(!sets || !sets.length) return '—';
     if(ex.type==='weight') return sets.map(function(s){ return (s.weight!=null?s.weight:'?')+'×'+(s.reps!=null?s.reps:'?'); }).join(', ');
     if(ex.type==='time') return sets.map(function(s){ return (s.seconds!=null?s.seconds:'?')+'s'; }).join(', ');
+    if(ex.type==='incline') return sets.map(function(s){ return 'H'+(s.height!=null?s.height:'?')+'×'+(s.reps!=null?s.reps:'?'); }).join(', ');
     return sets.map(function(s){ return (s.reps!=null?s.reps:'?'); }).join(', ');
   }
 
@@ -531,6 +594,13 @@
     if(ex.type==='time'){
       return '<div class="set-row time">'+num+
         '<input type="number" step="1" inputmode="numeric" class="inp-seconds" placeholder="sec" value="'+(prefill&&prefill.seconds!=null?prefill.seconds:'')+'">'+
+        '<button class="remove-set" type="button" aria-label="Remove set" onclick="this.parentElement.remove()">✕</button></div>';
+    }
+    if(ex.type==='incline'){
+      return '<div class="set-row incline">'+num+
+        '<input type="number" step="1" inputmode="numeric" class="inp-height" placeholder="height" value="'+(prefill&&prefill.height!=null?prefill.height:'')+'">'+
+        '<span class="x">×</span>'+
+        '<input type="number" step="1" inputmode="numeric" class="inp-reps" placeholder="reps" value="'+(prefill&&prefill.reps!=null?prefill.reps:'')+'">'+
         '<button class="remove-set" type="button" aria-label="Remove set" onclick="this.parentElement.remove()">✕</button></div>';
     }
     return '<div class="set-row reps">'+num+
@@ -568,7 +638,8 @@
 
     var hist = allSessionsForExercise(ex.id);
     var last = hist.find(function(h){ return !(h.date === date && h.day === activeDay); }) || null;
-    var best = bestMetricValue(ex.id, ex.type);
+    var best = ex.type==='incline' ? bestInclineHeight(ex.id) : bestMetricValue(ex.id, ex.type);
+    var hasBest = ex.type==='incline' ? (best !== null) : (best > 0);
     var curKey = sessionKey(date, activeDay);
     var existing = data.sessions[curKey] && data.sessions[curKey].exercises[ex.id];
 
@@ -581,8 +652,11 @@
 
     var refHTML = '<div class="ex-ref">';
     if(last) refHTML += '<span>Last (' + fmtDate(last.date) + dayContextNote(last.day) + '): <b>' + summarizeSets(ex, last.entry.sets) + '</b></span>';
-    if(best>0) refHTML += '<span>Best: <b>'+best+prUnitSuffix(ex.type)+'</b></span>';
-    if(!last && !best) refHTML = '<div class="ex-ref"><span style="color:var(--text-muted)">First time logging this one — set your baseline.</span>';
+    if(hasBest){
+      if(ex.type==='incline') refHTML += '<span>Best height: <b>'+best+(best===0?' — floor! 🎉':'')+'</b></span>';
+      else refHTML += '<span>Best: <b>'+best+prUnitSuffix(ex.type)+'</b></span>';
+    }
+    if(!last && !hasBest) refHTML = '<div class="ex-ref"><span style="color:var(--text-muted)">First time logging this one — set your baseline.</span>';
     refHTML += '</div>';
 
     return '<div class="ex-card" id="card-'+ex.id+'" data-exid="'+ex.id+'" data-type="'+ex.type+'">'+
@@ -928,6 +1002,223 @@
     return html;
   }
 
+  function renderHamburgerMenu(){
+    var html = '<div class="ham-menu">';
+    html += '<div class="ham-item" onclick="App.setViewFromMenu(\'calendar\')">📅 Calendar</div>';
+    html += '<div class="ham-item" onclick="App.setViewFromMenu(\'measurements\')">📏 Measurements</div>';
+    html += '<div class="ham-item" onclick="App.setViewFromMenu(\'export\')">⬇️ Export data</div>';
+    html += '</div>';
+    return html;
+  }
+
+  function ensureCalendarMonth(){
+    if(!calendarMonth){
+      var now = new Date();
+      calendarMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    }
+  }
+  function pad2(n){ return n<10 ? '0'+n : ''+n; }
+  function datesWithSessionsInfo(){
+    var map = {};
+    Object.values(data.sessions).forEach(function(s){
+      if(!map[s.date]) map[s.date] = {count:0, day:s.day};
+      map[s.date].count += Object.keys(s.exercises||{}).length;
+    });
+    return map;
+  }
+
+  function renderCalendarView(){
+    ensureCalendarMonth();
+    var y = calendarMonth.getFullYear();
+    var mo = calendarMonth.getMonth();
+    var monthLabel = calendarMonth.toLocaleDateString('en-US',{month:'long',year:'numeric'});
+    var firstDay = new Date(y, mo, 1);
+    var startOffset = (firstDay.getDay()+6)%7; // Monday=0 offset
+    var daysInMonth = new Date(y, mo+1, 0).getDate();
+    var sessMap = datesWithSessionsInfo();
+    var todayStr = todayISO();
+
+    var monthCount = 0;
+    Object.keys(sessMap).forEach(function(d){
+      var dd = new Date(d+'T00:00:00');
+      if(dd.getFullYear()===y && dd.getMonth()===mo) monthCount++;
+    });
+
+    var html = '';
+    html += '<div class="cal-header"><button class="icon-btn" onclick="App.calendarMonthShift(-1)">‹</button><div class="cal-month-label">'+monthLabel+'</div><button class="icon-btn" onclick="App.calendarMonthShift(1)">›</button></div>';
+    html += '<div class="cal-summary">'+monthCount+' workout'+(monthCount===1?'':'s')+' logged this month</div>';
+    html += '<div class="cal-grid cal-weekdays"><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span></div>';
+    html += '<div class="cal-grid">';
+    for(var i=0;i<startOffset;i++) html += '<div class="cal-cell empty"></div>';
+    for(var day=1; day<=daysInMonth; day++){
+      var dateStr = y+'-'+pad2(mo+1)+'-'+pad2(day);
+      var info = sessMap[dateStr];
+      var isToday = dateStr===todayStr;
+      var tier = info ? (info.count>=6 ? 'full' : (info.count>=3 ? 'mid' : 'light')) : '';
+      html += '<div class="cal-cell'+(isToday?' today':'')+(info?' logged '+tier:'')+'" onclick="App.calendarDayClick(\''+dateStr+'\')">'+
+        '<span class="cal-daynum">'+day+'</span></div>';
+    }
+    html += '</div>';
+    html += '<div class="cal-legend"><span class="cal-legend-swatch" style="background:var(--accent-dim);"></span> a little'+
+      '<span class="cal-legend-swatch" style="background:#2D6A4F38;margin-left:8px;"></span> some'+
+      '<span class="cal-legend-swatch" style="background:var(--accent);margin-left:8px;"></span> full session</div>';
+    html += '<div class="plan-hint" style="margin-top:12px;">Tap any day to view or log it, whether or not it already has an entry.</div>';
+    return html;
+  }
+
+  function computeChangeSinceFirst(defId){
+    var entries = data.measurements.entries || {};
+    var dates = Object.keys(entries).filter(function(d){ return entries[d][defId]!=null; }).sort();
+    if(!dates.length) return null;
+    var first = entries[dates[0]][defId];
+    var last = entries[dates[dates.length-1]][defId];
+    return {first:first, last:last, diff: Math.round((last-first)*100)/100, firstDate:dates[0], lastDate:dates[dates.length-1], count:dates.length};
+  }
+
+  function renderMeasurementsView(){
+    var m = data.measurements;
+    var html = '';
+    html += '<div class="info-card">Track whichever measurements are useful to you. Weekly or every couple of weeks is plenty — you don\'t need to log daily.</div>';
+    html += '<div class="date-row">Logging for <input type="date" id="measDateInput" value="'+measDate+'" onchange="App.setMeasDate(this.value)"></div>';
+
+    html += '<div class="ex-card">';
+    if(!m.defs.length){
+      html += '<div class="empty-state">No measurements set up yet — add one below.</div>';
+    }
+    m.defs.forEach(function(def){
+      var existing = (m.entries[measDate]||{})[def.id];
+      html += '<div class="meas-row">';
+      html += '<input type="text" class="meas-label-input" value="'+escAttr(def.label)+'" onchange="App.renameMeasurementDef(\''+def.id+'\', this.value)">';
+      html += '<input type="number" step="0.1" class="meas-value-input" id="meas-'+def.id+'" placeholder="'+m.unit+'" value="'+(existing!=null?existing:'')+'">';
+      html += '<button class="goal-remove-btn" onclick="App.removeMeasurementDef(\''+def.id+'\')" aria-label="Remove">✕</button>';
+      html += '</div>';
+    });
+    html += '<input type="text" class="typeahead-input" id="newMeasName" placeholder="Add a measurement (e.g. Calves)" style="margin-top:4px;">';
+    html += '<button class="add-ex-btn" onclick="App.addMeasurementDef()">+ Add measurement type</button>';
+    html += '</div>';
+
+    html += '<div class="save-bar"><button class="save-btn" onclick="App.saveMeasurements()">Save measurements</button><div class="toast" id="measToast"></div></div>';
+
+    html += '<div class="milestone-block" style="margin-top:16px;"><div class="milestone-title">Trends</div><div class="milestone-sub">Change since your first logged entry for each.</div>';
+    if(!m.defs.length){
+      html += '<div class="empty-state">Add a measurement above to start tracking.</div>';
+    } else {
+      m.defs.forEach(function(def){
+        var change = computeChangeSinceFirst(def.id);
+        html += '<div class="pr-item"><span>'+escAttr(def.label)+'</span>';
+        if(change && change.count>1){
+          var sign = change.diff>0?'+':'';
+          html += '<span class="w">'+change.last+' '+m.unit+' <span class="dt">'+sign+change.diff+' '+m.unit+' since '+fmtDate(change.firstDate)+'</span></span>';
+        } else if(change){
+          html += '<span class="dt">'+change.last+' '+m.unit+' logged '+fmtDate(change.firstDate)+' — log again to see a trend</span>';
+        } else {
+          html += '<span class="dt">Not logged yet</span>';
+        }
+        html += '</div>';
+      });
+    }
+    html += '</div>';
+    return html;
+  }
+
+  function buildTextExport(){
+    var lines = [];
+    lines.push('TRAINING LOG EXPORT');
+    lines.push('Generated ' + todayISO());
+    lines.push('');
+
+    if(data.goals && data.goals.length){
+      lines.push('GOALS');
+      data.goals.forEach(function(g){
+        lines.push('- ' + g.label + ': ' + g.date + ' (' + daysUntil(g.date) + ' days away)');
+      });
+      lines.push('');
+    }
+
+    lines.push('CURRENT PLAN');
+    var wdNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+    data.plan.order.forEach(function(dk){
+      var day = data.plan.days[dk];
+      lines.push(day.label + (day.weekday!=null ? ' ['+wdNames[day.weekday]+']' : ''));
+      day.exerciseIds.forEach(function(exId){
+        var def = data.library[exId];
+        if(!def) return;
+        var targetStr = def.type==='check' ? def.target : (def.sets+'x'+def.target);
+        lines.push('  - ' + def.name + ': ' + targetStr + (def.suggested ? ' (' + def.suggested + ')' : ''));
+      });
+      lines.push('');
+    });
+
+    lines.push('PERSONAL RECORDS');
+    var prs = (data.prs||[]).slice().sort(function(a,b){ return a.date<b.date?1:-1; });
+    if(!prs.length){ lines.push('(none yet)'); }
+    prs.forEach(function(p){
+      lines.push('- ' + p.exName + ': ' + prDisplayText(p) + ' (' + p.date + ')');
+    });
+    lines.push('');
+
+    lines.push('WORKOUT HISTORY (chronological)');
+    var sessionKeys = Object.keys(data.sessions).sort(function(a,b){
+      var da = data.sessions[a].date, db = data.sessions[b].date;
+      return da<db?-1:(da>db?1:0);
+    });
+    if(!sessionKeys.length){ lines.push('(no workouts logged yet)'); }
+    sessionKeys.forEach(function(sk){
+      var s = data.sessions[sk];
+      var dayLabel = data.plan.days[s.day] ? data.plan.days[s.day].label : s.day;
+      lines.push(s.date + ' — ' + dayLabel);
+      Object.keys(s.exercises||{}).forEach(function(exId){
+        var def = data.library[exId];
+        var name = def ? def.name : exId;
+        var entry = s.exercises[exId];
+        var valStr;
+        if(entry.sets){
+          valStr = summarizeSets({type: def ? def.type : 'weight'}, entry.sets);
+        } else {
+          valStr = entry.done ? 'Done' : 'Not done';
+        }
+        lines.push('  ' + name + ': ' + valStr + (entry.notes ? ' — ' + entry.notes : ''));
+      });
+    });
+    lines.push('');
+
+    if(data.measurements && data.measurements.defs && data.measurements.defs.length){
+      lines.push('BODY MEASUREMENTS');
+      data.measurements.defs.forEach(function(def){
+        var change = computeChangeSinceFirst(def.id);
+        if(change){
+          var sign = change.diff>0?'+':'';
+          lines.push('- ' + def.label + ': ' + change.last + ' ' + data.measurements.unit + ' (started ' + change.first + ' ' + data.measurements.unit + ' on ' + change.firstDate + ', change ' + sign + change.diff + ' ' + data.measurements.unit + ')');
+        }
+      });
+      lines.push('');
+    }
+
+    return lines.join('\n');
+  }
+
+  function downloadFile(filename, content, mime){
+    var blob = new Blob([content], {type: mime});
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+  }
+
+  function renderExportView(){
+    var html = '';
+    html += '<div class="info-card">Export your training data to share with a trainer or paste into an AI assistant for feedback as your goals or fitness change.</div>';
+    html += '<button class="save-btn" onclick="App.downloadTextExport()">Download as text (.txt)</button>';
+    html += '<button class="backup-btn" onclick="App.downloadJSONExport()">Download as JSON (.json)</button>';
+    html += '<button class="backup-btn" onclick="App.showTextExport()">Show as text to copy</button>';
+    html += '<div id="exportTextBox"></div>';
+    return html;
+  }
+
   function render(){
     if(sdkLoadError){
       document.getElementById('app').innerHTML = renderSdkErrorScreen();
@@ -959,8 +1250,9 @@
     var thisWeek = Object.values(data.sessions).filter(function(s){ return s.date >= weekStartISO; }).length;
 
     var html = '';
-    html += '<div class="app-title">Training Log</div>';
+    html += '<div class="header-row"><div class="app-title">Training Log</div><button class="hamburger-btn" onclick="App.toggleMenu()" aria-label="Menu">☰</button></div>';
     html += '<div class="account-line">'+currentUser.email+' · <a onclick="App.logout()">Sign out</a></div>';
+    if(menuOpen) html += renderHamburgerMenu();
 
     html += renderGoalsSection();
 
@@ -970,13 +1262,23 @@
       '<b>'+(data.prs||[]).length+'</b> PRs'+
     '</div>';
 
-    html += '<div class="view-switch">'+
-      '<button class="'+(view==='log'?'active':'')+'" onclick="App.setView(\'log\')">Log</button>'+
-      '<button class="'+(view==='milestones'?'active':'')+'" onclick="App.setView(\'milestones\')">Milestones</button>'+
-      '<button class="'+(view==='plan'?'active':'')+'" onclick="App.setView(\'plan\')">Plan'+(planDirty?' •':'')+'</button>'+
-    '</div>';
+    var secondaryTitles = {calendar:'Calendar', measurements:'Measurements', export:'Export data'};
+    if(secondaryTitles[view]){
+      html += '<div class="back-row"><span class="back-link" onclick="App.setView(\'log\')">‹ Back</span><span class="back-title">'+secondaryTitles[view]+'</span></div>';
+    } else {
+      html += '<div class="view-switch">'+
+        '<button class="'+(view==='log'?'active':'')+'" onclick="App.setView(\'log\')">Log</button>'+
+        '<button class="'+(view==='milestones'?'active':'')+'" onclick="App.setView(\'milestones\')">Milestones</button>'+
+        '<button class="'+(view==='plan'?'active':'')+'" onclick="App.setView(\'plan\')">Plan'+(planDirty?' •':'')+'</button>'+
+      '</div>';
+    }
 
-    html += view==='log' ? renderLogView() : (view==='milestones' ? renderMilestones() : renderPlanEditor());
+    if(view==='log') html += renderLogView();
+    else if(view==='milestones') html += renderMilestones();
+    else if(view==='plan') html += renderPlanEditor();
+    else if(view==='calendar') html += renderCalendarView();
+    else if(view==='measurements') html += renderMeasurementsView();
+    else if(view==='export') html += renderExportView();
 
     document.getElementById('app').innerHTML = html;
   }
@@ -995,6 +1297,12 @@
       } else if(ex.type==='time'){
         var s = row.querySelector('.inp-seconds').value;
         if(s!=='') out.push({seconds: parseInt(s,10)});
+      } else if(ex.type==='incline'){
+        var h = row.querySelector('.inp-height').value;
+        var ir = row.querySelector('.inp-reps').value;
+        if(h!=='' || ir!==''){
+          out.push({height: h===''?null:parseInt(h,10), reps: ir===''?null:parseInt(ir,10)});
+        }
       } else {
         var rr = row.querySelector('.inp-reps').value;
         if(rr!=='') out.push({reps: parseInt(rr,10)});
@@ -1067,6 +1375,20 @@
             data.prs.push(pr);
             newPRs.push(pr);
           }
+        } else if(ex.type==='incline' && sets.length){
+          var prevBestH = bestInclineHeight(ex.id);
+          var newMinH = null;
+          sets.forEach(function(s){
+            if(s.height!=null && s.reps>0){
+              if(newMinH===null || s.height<newMinH) newMinH = s.height;
+            }
+          });
+          if(newMinH!==null && (prevBestH===null || newMinH<prevBestH)){
+            data.prs = (data.prs||[]).filter(function(p){ return !(p.exId===ex.id && p.date===activeDate); });
+            var incPr = {exId:ex.id, exName:ex.name, type:'incline', value:newMinH, date:activeDate};
+            data.prs.push(incPr);
+            newPRs.push(incPr);
+          }
         }
       });
 
@@ -1132,6 +1454,22 @@
           if(!entry.sets) return;
           var def = data.library[exId];
           var type = def ? def.type : 'weight';
+          if(type==='incline'){
+            var minInSession = null;
+            entry.sets.forEach(function(set){
+              if(set.height!=null && set.reps>0){
+                if(minInSession===null || set.height<minInSession) minInSession = set.height;
+              }
+            });
+            if(minInSession===null) return;
+            var prevBestH = bestSoFar.hasOwnProperty(exId) ? bestSoFar[exId] : null;
+            if(prevBestH===null || minInSession<prevBestH){
+              bestSoFar[exId] = minInSession;
+              var exNameInc = def ? def.name : exId;
+              rebuilt.push({exId:exId, exName:exNameInc, type:'incline', value:minInSession, date:s.date});
+            }
+            return;
+          }
           if(type!=='weight' && type!=='time' && type!=='reps') return;
           var maxInSession = 0;
           entry.sets.forEach(function(set){
@@ -1461,6 +1799,91 @@
       data.goals = (data.goals||[]).filter(function(g){ return g.id!==id; });
       persist();
       render();
+    },
+    toggleMenu: function(){
+      menuOpen = !menuOpen;
+      render();
+    },
+    setViewFromMenu: function(v){
+      menuOpen = false;
+      App.setView(v);
+    },
+    calendarMonthShift: function(dir){
+      ensureCalendarMonth();
+      calendarMonth = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth()+dir, 1);
+      render();
+    },
+    calendarDayClick: function(dateStr){
+      activeDate = dateStr;
+      var sessMap = datesWithSessionsInfo();
+      var info = sessMap[dateStr];
+      if(info && info.day && data.plan.days[info.day]){
+        activeDay = info.day;
+      } else {
+        var idx = new Date(dateStr+'T00:00:00').getDay();
+        var found = data.plan.order.find(function(k){ return data.plan.days[k].weekday === idx; });
+        if(found) activeDay = found;
+      }
+      view = 'log';
+      render();
+    },
+    setMeasDate: function(v){ measDate = v; render(); },
+    addMeasurementDef: function(){
+      var input = document.getElementById('newMeasName');
+      var name = (input && input.value ? input.value : '').trim();
+      if(!name) return;
+      data.measurements.defs.push({id: genId('meas'), label:name});
+      persist();
+      render();
+    },
+    removeMeasurementDef: function(id){
+      var def = data.measurements.defs.find(function(d){ return d.id===id; });
+      if(!confirm('Remove "'+(def?def.label:'this measurement')+'"? Past logged values for it will no longer be shown.')) return;
+      data.measurements.defs = data.measurements.defs.filter(function(d){ return d.id!==id; });
+      persist();
+      render();
+    },
+    renameMeasurementDef: function(id, value){
+      var def = data.measurements.defs.find(function(d){ return d.id===id; });
+      if(def) def.label = (value||'').trim() || def.label;
+      persist();
+      render();
+    },
+    saveMeasurements: function(){
+      var entry = {};
+      data.measurements.defs.forEach(function(def){
+        var el = document.getElementById('meas-'+def.id);
+        var v = el ? el.value : '';
+        if(v!=='') entry[def.id] = parseFloat(v);
+      });
+      data.measurements.entries[measDate] = entry;
+      persist().then(function(result){
+        render();
+        var toast = document.getElementById('measToast');
+        if(!result.ok){
+          if(toast){ toast.style.color='var(--bad)'; toast.textContent = "Couldn't save: "+result.error; }
+          return;
+        }
+        if(toast){ toast.style.color='var(--good)'; toast.textContent = 'Measurements saved ✓'; }
+        setTimeout(function(){
+          var t = document.getElementById('measToast');
+          if(t) t.textContent = '';
+        }, 4000);
+      });
+    },
+    downloadTextExport: function(){
+      downloadFile('training-log-'+todayISO()+'.txt', buildTextExport(), 'text/plain');
+    },
+    downloadJSONExport: function(){
+      downloadFile('training-log-'+todayISO()+'.json', JSON.stringify(data, null, 2), 'application/json');
+    },
+    showTextExport: function(){
+      var box = document.getElementById('exportTextBox');
+      if(!box) return;
+      box.innerHTML = '<textarea class="backup-textarea" readonly id="exportTA" style="min-height:320px;">'+buildTextExport()+'</textarea>';
+      var ta = document.getElementById('exportTA');
+      ta.focus();
+      ta.select();
     },
     logout: function(){
       auth.signOut();
