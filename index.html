@@ -215,6 +215,10 @@
   .meas-label-input{flex:1.4;background:var(--panel-2);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:9px 10px;font-size:13px;min-width:0;}
   .meas-value-input{flex:1;background:var(--panel-2);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:9px 8px;font-family:'JetBrains Mono',monospace;font-size:13px;text-align:center;min-width:0;}
 
+  .drag-handle{cursor:grab;color:var(--text-muted);font-size:15px;padding:4px 7px;touch-action:none;user-select:none;flex-shrink:0;background:var(--panel-2);border:1px solid var(--border);border-radius:7px;}
+  .drag-handle:active{cursor:grabbing;}
+  .plan-day-card.dragging, .plan-ex-row.dragging{position:relative;z-index:50;box-shadow:0 8px 20px rgba(20,24,20,0.18);background:var(--panel);border-radius:10px;opacity:0.98;}
+
   @media (prefers-reduced-motion: no-preference){
     .ex-card{transition:border-color .15s ease;}
   }
@@ -398,6 +402,8 @@
   var menuOpen = false;
   var calendarMonth = null;
   var measDate = todayISO();
+  var showImportHelp = false;
+  var dragState = null;
 
   function todayISO(){
     var d = new Date();
@@ -825,6 +831,7 @@
       html += '<div class="plan-ex-row">';
       html += '<div class="plan-ex-info"><span class="plan-ex-name">'+escAttr(def.name)+'</span><span class="plan-ex-meta">'+typeLabel(def.type)+' · '+(def.type==='check'? escAttr(def.target) : def.sets+'×'+escAttr(def.target))+'</span></div>';
       html += '<div class="plan-ex-actions">';
+      html += '<span class="drag-handle" onpointerdown="App.startDrag(event,\'exercise\',\''+dayKey+'\','+i+')">⠿</span>';
       html += '<button class="icon-btn" '+(i===0?'disabled':'')+' onclick="App.moveExercise(\''+dayKey+'\','+i+',-1)">▲</button>';
       html += '<button class="icon-btn" '+(i===day.exerciseIds.length-1?'disabled':'')+' onclick="App.moveExercise(\''+dayKey+'\','+i+',1)">▼</button>';
       html += '<button class="icon-btn" onclick="App.editExercise(\''+exId+'\')">Edit</button>';
@@ -905,6 +912,7 @@
       html += '<div class="plan-day-head">';
       html += '<div class="plan-day-title">'+escAttr(day.label)+'<span class="plan-day-count">'+day.exerciseIds.length+' exercises</span></div>';
       html += '<div class="plan-day-actions">';
+      html += '<span class="drag-handle" onpointerdown="App.startDrag(event,\'day\',null,'+idx+')">⠿</span>';
       html += '<button class="icon-btn" '+(idx===0?'disabled':'')+' onclick="App.moveDay(\''+dayKey+'\',-1)">▲</button>';
       html += '<button class="icon-btn" '+(idx===planDraft.plan.order.length-1?'disabled':'')+' onclick="App.moveDay(\''+dayKey+'\',1)">▼</button>';
       html += '<button class="icon-btn" onclick="App.toggleExpandDay(\''+dayKey+'\')">'+(expanded?'Close':'Edit')+'</button>';
@@ -1135,16 +1143,22 @@
       lines.push('');
     }
 
-    lines.push('CURRENT PLAN');
+    lines.push('=== PLAN ===');
+    lines.push('(This section can be edited and re-imported — see the import format guide.)');
+    lines.push('');
     var wdNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
     data.plan.order.forEach(function(dk){
       var day = data.plan.days[dk];
-      lines.push(day.label + (day.weekday!=null ? ' ['+wdNames[day.weekday]+']' : ''));
+      lines.push('DAY: ' + day.label);
+      lines.push('WEEKDAY: ' + (day.weekday!=null ? wdNames[day.weekday] : 'none'));
+      if(day.warmup) lines.push('WARMUP: ' + day.warmup);
+      if(day.cooldown) lines.push('COOLDOWN: ' + day.cooldown);
+      if(day.note) lines.push('NOTE: ' + day.note);
       day.exerciseIds.forEach(function(exId){
         var def = data.library[exId];
         if(!def) return;
         var targetStr = def.type==='check' ? def.target : (def.sets+'x'+def.target);
-        lines.push('  - ' + def.name + ': ' + targetStr + (def.suggested ? ' (' + def.suggested + ')' : ''));
+        lines.push('- ' + def.name + ' | ' + def.type + ' | ' + targetStr + ' | ' + (def.suggested||''));
       });
       lines.push('');
     });
@@ -1154,31 +1168,6 @@
     if(!prs.length){ lines.push('(none yet)'); }
     prs.forEach(function(p){
       lines.push('- ' + p.exName + ': ' + prDisplayText(p) + ' (' + p.date + ')');
-    });
-    lines.push('');
-
-    lines.push('WORKOUT HISTORY (chronological)');
-    var sessionKeys = Object.keys(data.sessions).sort(function(a,b){
-      var da = data.sessions[a].date, db = data.sessions[b].date;
-      return da<db?-1:(da>db?1:0);
-    });
-    if(!sessionKeys.length){ lines.push('(no workouts logged yet)'); }
-    sessionKeys.forEach(function(sk){
-      var s = data.sessions[sk];
-      var dayLabel = data.plan.days[s.day] ? data.plan.days[s.day].label : s.day;
-      lines.push(s.date + ' — ' + dayLabel);
-      Object.keys(s.exercises||{}).forEach(function(exId){
-        var def = data.library[exId];
-        var name = def ? def.name : exId;
-        var entry = s.exercises[exId];
-        var valStr;
-        if(entry.sets){
-          valStr = summarizeSets({type: def ? def.type : 'weight'}, entry.sets);
-        } else {
-          valStr = entry.done ? 'Done' : 'Not done';
-        }
-        lines.push('  ' + name + ': ' + valStr + (entry.notes ? ' — ' + entry.notes : ''));
-      });
     });
     lines.push('');
 
@@ -1209,13 +1198,132 @@
     setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
   }
 
+  var VALID_EX_TYPES = ['weight','time','reps','incline','check'];
+  var WD_NAME_MAP = {sun:0,mon:1,tue:2,wed:3,thu:4,fri:5,sat:6,sunday:0,monday:1,tuesday:2,wednesday:3,thursday:4,friday:5,saturday:6,none:null,'':null};
+
+  function parsePlanText(text){
+    var lines = text.split('\n');
+    var days = [];
+    var currentDay = null;
+    var errors = [];
+
+    lines.forEach(function(rawLine, idx){
+      var line = rawLine.trim();
+      if(!line) return;
+      var lineNo = idx+1;
+
+      if(/^DAY\s*:/i.test(line)){
+        var label = line.replace(/^DAY\s*:/i,'').trim();
+        currentDay = {label: label || 'Untitled Day', weekday: null, warmup:'', cooldown:'', note:'', exercises: []};
+        days.push(currentDay);
+        return;
+      }
+      if(!currentDay){
+        errors.push('Line '+lineNo+': "'+line+'" appears before any "DAY:" line.');
+        return;
+      }
+      if(/^WEEKDAY\s*:/i.test(line)){
+        var wdText = line.replace(/^WEEKDAY\s*:/i,'').trim().toLowerCase();
+        currentDay.weekday = WD_NAME_MAP.hasOwnProperty(wdText) ? WD_NAME_MAP[wdText] : null;
+        return;
+      }
+      if(/^WARMUP\s*:/i.test(line)){ currentDay.warmup = line.replace(/^WARMUP\s*:/i,'').trim(); return; }
+      if(/^COOLDOWN\s*:/i.test(line)){ currentDay.cooldown = line.replace(/^COOLDOWN\s*:/i,'').trim(); return; }
+      if(/^NOTE\s*:/i.test(line)){ currentDay.note = line.replace(/^NOTE\s*:/i,'').trim(); return; }
+      if(line.charAt(0)==='-'){
+        var body = line.substring(1).trim();
+        var parts = body.split('|').map(function(p){ return p.trim(); });
+        if(parts.length < 2 || !parts[0]){
+          errors.push('Line '+lineNo+': expected "- Name | type | 3x10 | notes" — got "'+line+'"');
+          return;
+        }
+        var name = parts[0];
+        var type = (parts[1]||'weight').toLowerCase();
+        if(VALID_EX_TYPES.indexOf(type)===-1){
+          errors.push('Line '+lineNo+': unknown type "'+parts[1]+'" — use weight, time, reps, incline, or check.');
+          return;
+        }
+        var setsTarget = parts[2] || (type==='check' ? '1 set' : '3x10');
+        var sets = 3, target = setsTarget;
+        if(type!=='check'){
+          var m = setsTarget.match(/^(\d+)\s*x\s*(.+)$/i);
+          if(m){ sets = parseInt(m[1],10) || 3; target = m[2].trim(); }
+        }
+        var suggested = parts[3] || '';
+        currentDay.exercises.push({name:name, type:type, sets:sets, target:target, suggested:suggested});
+        return;
+      }
+      errors.push('Line '+lineNo+': couldn\'t understand "'+line+'". Expected DAY:, WEEKDAY:, WARMUP:, COOLDOWN:, NOTE:, or a "- Name | type | ..." line.');
+    });
+
+    if(!days.length) errors.push('No days found — start each day with a line like "DAY: Leg Day".');
+    return {days: days, errors: errors};
+  }
+
+  function applyParsedPlanToDraft(parsed){
+    var newOrder = [];
+    var newDays = {};
+    parsed.days.forEach(function(pd){
+      var dayKey = genId('day');
+      var exerciseIds = [];
+      pd.exercises.forEach(function(pe){
+        var existingId = Object.keys(planDraft.library).find(function(id){
+          var d = planDraft.library[id];
+          return d.name.toLowerCase() === pe.name.toLowerCase() && d.type === pe.type;
+        });
+        var exId;
+        if(existingId){
+          exId = existingId;
+          planDraft.library[exId].sets = pe.sets;
+          planDraft.library[exId].target = pe.target;
+          if(pe.suggested) planDraft.library[exId].suggested = pe.suggested;
+        } else {
+          exId = genId('ex');
+          planDraft.library[exId] = {name:pe.name, type:pe.type, sets:pe.sets, target:pe.target, suggested:pe.suggested};
+        }
+        exerciseIds.push(exId);
+      });
+      newDays[dayKey] = {
+        label: pd.label,
+        weekday: pd.weekday,
+        warmup: pd.warmup || '',
+        cooldown: pd.cooldown || '',
+        note: pd.note || '',
+        exerciseIds: exerciseIds
+      };
+      newOrder.push(dayKey);
+    });
+    planDraft.plan.order = newOrder;
+    planDraft.plan.days = newDays;
+    planDirty = true;
+  }
+
   function renderExportView(){
     var html = '';
-    html += '<div class="info-card">Export your training data to share with a trainer or paste into an AI assistant for feedback as your goals or fitness change.</div>';
+    html += '<div class="milestone-block"><div class="milestone-title">Export</div><div class="milestone-sub">Share with a trainer, or paste into an AI assistant for feedback as your goals or fitness change.</div>';
     html += '<button class="save-btn" onclick="App.downloadTextExport()">Download as text (.txt)</button>';
-    html += '<button class="backup-btn" onclick="App.downloadJSONExport()">Download as JSON (.json)</button>';
+    html += '<button class="backup-btn" onclick="App.downloadJSONExport()">Download full backup as JSON (.json)</button>';
     html += '<button class="backup-btn" onclick="App.showTextExport()">Show as text to copy</button>';
     html += '<div id="exportTextBox"></div>';
+    html += '</div>';
+
+    html += '<div class="milestone-block"><div class="milestone-title">Import a plan</div><div class="milestone-sub">Paste a plan in the format below — it opens in the Plan tab for you to review before anything is saved.</div>';
+    html += '<textarea class="backup-textarea" id="importPlanText" style="min-height:160px;" placeholder="DAY: Back + Biceps\nWEEKDAY: Mon\n- Lat Pulldown | weight | 3x10 | Challenging by rep 8\n- Side Plank | time | 2x30 | Bodyweight"></textarea>';
+    html += '<button class="save-btn" style="margin-top:10px;" onclick="App.parseAndPreviewImport()">Parse & review in Plan tab</button>';
+    html += '<div class="toast" id="importToast"></div>';
+    html += '<div class="goals-edit-link" onclick="App.toggleImportFormatHelp()" style="margin-top:6px;">'+(showImportHelp?'Hide format guide':'Show format guide')+'</div>';
+    if(showImportHelp){
+      html += '<div class="info-card" style="margin-top:8px;">'+
+        '<b>DAY:</b> day name (required, starts a new day)<br>'+
+        '<b>WEEKDAY:</b> Sun–Sat, or "none" (optional)<br>'+
+        '<b>WARMUP: / COOLDOWN: / NOTE:</b> optional text<br>'+
+        '<b>- Name | type | 3x10 | suggested</b> — one line per exercise<br><br>'+
+        'Type is one of: weight, time, reps, incline, check. For "check" type, skip the "3x" and just give the target, e.g. "1 min". The "suggested" field can be left blank but keep the trailing "|".<br><br>'+
+        'This is exactly the format the text export above uses, so exporting → editing with AI → importing round-trips cleanly.'+
+      '</div>';
+    }
+    html += '</div>';
+
     return html;
   }
 
@@ -1884,6 +1992,107 @@
       var ta = document.getElementById('exportTA');
       ta.focus();
       ta.select();
+    },
+    toggleImportFormatHelp: function(){
+      showImportHelp = !showImportHelp;
+      render();
+    },
+    parseAndPreviewImport: function(){
+      var ta = document.getElementById('importPlanText');
+      var text = ta ? ta.value : '';
+      var toast = document.getElementById('importToast');
+      if(!text.trim()){
+        if(toast){ toast.style.color='var(--bad)'; toast.textContent='Paste a plan first.'; }
+        return;
+      }
+      var parsed = parsePlanText(text);
+      if(parsed.errors.length){
+        if(toast){
+          toast.style.color='var(--bad)';
+          toast.textContent = parsed.errors.slice(0,2).join(' · ') + (parsed.errors.length>2 ? ' · +'+(parsed.errors.length-2)+' more issue(s)' : '');
+        }
+        return;
+      }
+      planDraft = cloneForDraft();
+      applyParsedPlanToDraft(parsed);
+      planUI = {expandedDay:null, addingExercise:false, addMode:'library', editingEx:null, showLibrary:false, mergingEx:null};
+      view = 'plan';
+      render();
+    },
+
+    // ---- Drag-to-reorder (Pointer Events — works for touch and mouse alike) ----
+    startDrag: function(evt, scope, dayKey, index){
+      evt.preventDefault();
+      var handle = evt.currentTarget;
+      var rowSelector = scope==='day' ? '.plan-day-card' : '.plan-ex-row';
+      var row = handle.closest(rowSelector);
+      if(!row) return;
+      var container = row.parentElement;
+      var items = Array.prototype.filter.call(container.children, function(c){
+        return c.classList && c.classList.contains(scope==='day' ? 'plan-day-card' : 'plan-ex-row');
+      });
+      dragState = {
+        scope: scope, dayKey: dayKey,
+        fromIndex: index, currentIndex: index,
+        startY: evt.clientY,
+        row: row, items: items,
+        rowHeight: row.offsetHeight || 44,
+        pointerId: evt.pointerId
+      };
+      row.classList.add('dragging');
+      try{ handle.setPointerCapture(evt.pointerId); }catch(e){}
+      handle.onpointermove = App.onDragMove;
+      handle.onpointerup = App.onDragEnd;
+      handle.onpointercancel = App.onDragEnd;
+    },
+    onDragMove: function(evt){
+      if(!dragState) return;
+      var deltaY = evt.clientY - dragState.startY;
+      dragState.row.style.transform = 'translateY('+deltaY+'px)';
+      var shift = Math.round(deltaY / dragState.rowHeight);
+      var newIndex = Math.max(0, Math.min(dragState.items.length-1, dragState.fromIndex + shift));
+      dragState.currentIndex = newIndex;
+      var lo = Math.min(dragState.fromIndex, newIndex);
+      var hi = Math.max(dragState.fromIndex, newIndex);
+      dragState.items.forEach(function(it, i){
+        if(it === dragState.row) return;
+        if(i>=lo && i<=hi){
+          it.style.transition = 'transform 0.12s ease';
+          it.style.transform = newIndex > dragState.fromIndex ? 'translateY(-'+dragState.rowHeight+'px)' : 'translateY('+dragState.rowHeight+'px)';
+        } else {
+          it.style.transition = '';
+          it.style.transform = '';
+        }
+      });
+    },
+    onDragEnd: function(evt){
+      if(!dragState) return;
+      var handle = evt.currentTarget;
+      try{ handle.releasePointerCapture(dragState.pointerId); }catch(e){}
+      handle.onpointermove = null;
+      handle.onpointerup = null;
+      handle.onpointercancel = null;
+
+      var ds = dragState;
+      dragState = null;
+      ds.row.classList.remove('dragging');
+      ds.row.style.transform = '';
+      ds.items.forEach(function(it){ it.style.transform=''; it.style.transition=''; });
+
+      if(ds.currentIndex === ds.fromIndex) return;
+
+      ensureDraft();
+      if(ds.scope==='day'){
+        var order = planDraft.plan.order;
+        var moved = order.splice(ds.fromIndex,1)[0];
+        order.splice(ds.currentIndex,0,moved);
+      } else {
+        var day = getDraftDay(ds.dayKey);
+        var movedEx = day.exerciseIds.splice(ds.fromIndex,1)[0];
+        day.exerciseIds.splice(ds.currentIndex,0,movedEx);
+      }
+      planDirty = true;
+      render();
     },
     logout: function(){
       auth.signOut();
