@@ -219,6 +219,21 @@
   .drag-handle:active{cursor:grabbing;}
   .plan-day-card.dragging, .plan-ex-row.dragging{position:relative;z-index:50;box-shadow:0 8px 20px rgba(20,24,20,0.18);background:var(--panel);border-radius:10px;opacity:0.98;}
 
+  .muscle-chip-row{display:flex;flex-wrap:wrap;gap:6px;}
+  .muscle-chip{background:var(--panel-2);border:1px solid var(--border);color:var(--text-muted);border-radius:20px;padding:5px 11px;font-size:11.5px;cursor:pointer;}
+  .muscle-chip.active-primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600;}
+  .muscle-chip.active-secondary{background:var(--accent-dim);border-color:var(--accent);color:var(--accent);font-weight:500;}
+
+  .coverage-row{margin-bottom:12px;}
+  .coverage-row-head{display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:4px;}
+  .coverage-row-head b{font-weight:600;}
+  .coverage-track{background:var(--panel-2);border-radius:6px;height:8px;overflow:hidden;}
+  .coverage-fill{background:var(--accent);height:100%;border-radius:6px;}
+  .coverage-row-sub{font-size:10.5px;color:var(--text-muted);margin-top:3px;}
+  .coverage-empty-tag{color:var(--text-muted);font-style:italic;}
+  .flex-area-chip{display:inline-flex;align-items:center;gap:5px;background:var(--panel-2);border:1px solid var(--border);border-radius:20px;padding:5px 11px;font-size:11.5px;margin:0 6px 6px 0;}
+  .flex-area-chip.covered{background:var(--accent-dim);border-color:var(--accent);color:var(--accent);font-weight:500;}
+
   @media (prefers-reduced-motion: no-preference){
     .ex-card{transition:border-color .15s ease;}
   }
@@ -261,6 +276,84 @@
     {id:'m_chest', label:'Chest'},
     {id:'m_arms', label:'Arms'}
   ];
+
+  // Starting muscle-group vocabulary — extensible, not exhaustive. Users can
+  // add custom tags for anything that doesn't fit (see toggleMuscleTag /
+  // addCustomMuscleGroup). Abductors and adductors are kept separate since
+  // the exercise library already distinguishes them.
+  var MUSCLE_GROUPS_DEFAULT = [
+    'Chest','Lats','Upper Back / Traps','Rear Delts','Shoulders','Rotator Cuff',
+    'Biceps','Triceps','Forearms / Grip','Core','Obliques','Lower Back',
+    'Glutes','Quads','Hamstrings','Hip Flexors','Hip Abductors','Hip Adductors',
+    'Calves','Shins / Tibialis','Ankle Stabilizers'
+  ];
+
+  // Name → {primary:[...], secondary:[...]} lookup covering exercises common
+  // to this app's default plans and this conversation's history, used by the
+  // one-click "Auto-tag known exercises" tool. Matching is case-insensitive
+  // and only fills in exercises that don't already have tags.
+  var EXERCISE_MUSCLE_LOOKUP = {
+    'lat pulldown': {p:['Lats'], s:['Biceps','Rear Delts']},
+    'seated cable row': {p:['Lats','Upper Back / Traps'], s:['Biceps','Rear Delts']},
+    'bent-over db row': {p:['Lats','Upper Back / Traps'], s:['Biceps','Rear Delts','Lower Back']},
+    'face pulls': {p:['Rear Delts','Rotator Cuff'], s:['Upper Back / Traps']},
+    'db bicep curl': {p:['Biceps'], s:['Forearms / Grip']},
+    'hammer curl': {p:['Biceps','Forearms / Grip'], s:[]},
+    'hanging knee raise': {p:['Core'], s:['Hip Flexors','Forearms / Grip']},
+    'side plank': {p:['Obliques','Core'], s:[]},
+    'db chest press': {p:['Chest'], s:['Triceps','Shoulders']},
+    'incline db press': {p:['Chest','Shoulders'], s:['Triceps']},
+    'incline push-up': {p:['Chest'], s:['Triceps','Shoulders','Core']},
+    'tricep pushdown': {p:['Triceps'], s:[]},
+    'overhead tricep extension': {p:['Triceps'], s:[]},
+    'lateral raise': {p:['Shoulders'], s:[]},
+    'plank': {p:['Core'], s:['Shoulders','Glutes']},
+    'cable woodchopper': {p:['Obliques','Core'], s:['Shoulders']},
+    'db shoulder press': {p:['Shoulders'], s:['Triceps','Upper Back / Traps']},
+    'arnold press': {p:['Shoulders'], s:['Triceps','Rotator Cuff']},
+    'hyperextension': {p:['Lower Back'], s:['Glutes','Hamstrings']},
+    'incline crunches': {p:['Core'], s:[]},
+    'reverse crunch': {p:['Core'], s:['Hip Flexors']},
+    'leg raise': {p:['Core','Hip Flexors'], s:[]},
+    'goblet squat': {p:['Quads','Glutes'], s:['Core','Hamstrings']},
+    'leg press': {p:['Quads','Glutes'], s:['Hamstrings']},
+    'leg extension': {p:['Quads'], s:[]},
+    'leg curl': {p:['Hamstrings'], s:[]},
+    'abductor machine': {p:['Hip Abductors','Glutes'], s:[]},
+    'adductor machine': {p:['Hip Adductors'], s:[]},
+    'standing calf raise': {p:['Calves'], s:[]},
+    'single-leg rdl': {p:['Hamstrings','Glutes'], s:['Core','Ankle Stabilizers']},
+    'step-up': {p:['Quads','Glutes'], s:['Hamstrings','Ankle Stabilizers']},
+    'decline sit-up': {p:['Core'], s:['Hip Flexors']},
+    'cable crunch': {p:['Core'], s:[]},
+    'romanian deadlift': {p:['Hamstrings','Glutes'], s:['Lower Back']},
+    'bulgarian split squat': {p:['Quads','Glutes'], s:['Hamstrings']},
+    'bulgarian split squats': {p:['Quads','Glutes'], s:['Hamstrings']},
+    'hip thrust': {p:['Glutes'], s:['Hamstrings']},
+    'tricep dips': {p:['Triceps'], s:['Chest','Shoulders']},
+    'monster walks': {p:['Hip Abductors','Glutes'], s:['Ankle Stabilizers']},
+    'tibialis raises': {p:['Shins / Tibialis'], s:[]},
+    'single leg balance': {p:['Ankle Stabilizers'], s:['Glutes','Core']},
+    "child's pose": {p:['Lower Back','Hip Flexors'], s:[]},
+    'downward dog → cobra flow': {p:['Hamstrings','Calves','Core','Chest'], s:[]},
+    'low lunge (hip flexor stretch)': {p:['Hip Flexors','Quads'], s:[]},
+    'pigeon pose': {p:['Glutes','Hip Abductors'], s:[]},
+    'seated forward fold': {p:['Hamstrings','Lower Back'], s:[]},
+    'reclined figure-4 stretch': {p:['Glutes','Hip Abductors'], s:[]},
+    'supine figure-4 stretch': {p:['Glutes','Hip Abductors'], s:[]},
+    'supine spinal twist': {p:['Lower Back','Obliques'], s:[]},
+    'legs-up-the-wall': {p:['Calves','Hamstrings'], s:[]},
+    'savasana': {p:[], s:[]},
+    'savasana + 4-7-8 breathing': {p:[], s:[]},
+    'foam roll: calves, quads, it band, glutes': {p:['Calves','Quads','Glutes','Hip Abductors'], s:[]},
+    'standing calf stretch': {p:['Calves'], s:[]},
+    'straight knee calf stretch': {p:['Calves'], s:[]},
+    'half-kneeling hip flexor stretch': {p:['Hip Flexors'], s:[]},
+    'wide-legged forward fold': {p:['Hamstrings','Hip Adductors'], s:[]},
+    'happy baby pose': {p:['Hip Adductors','Lower Back'], s:[]},
+    'knee-to-wall ankle mobility': {p:['Ankle Stabilizers','Shins / Tibialis'], s:[]},
+    '90 90 hip switches': {p:['Hip Flexors','Glutes','Hip Adductors'], s:[]}
+  };
 
   // DEFAULT_EXERCISES + EXTRA_LIBRARY_EXERCISES seed a brand-new user's Plan
   // and Exercise Library the first time they log in. Shared exercises (e.g.
@@ -426,6 +519,9 @@
   function escAttr(s){
     return (s==null?'':String(s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
+  function escJs(s){
+    return (s==null?'':String(s)).replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+  }
   function typeLabel(t){
     return {weight:'Weight',time:'Timed',reps:'Reps',incline:'Incline',check:'Checklist'}[t] || t;
   }
@@ -455,20 +551,20 @@
       order.push(key);
       var ids = [];
       d.list.forEach(function(ex){
-        library[ex.id] = {name:ex.name, type:ex.type, sets:ex.sets||1, target:ex.target, suggested:ex.suggested||''};
+        library[ex.id] = {name:ex.name, type:ex.type, sets:ex.sets||1, target:ex.target, suggested:ex.suggested||'', primaryMuscles:ex.primaryMuscles||[], secondaryMuscles:ex.secondaryMuscles||[]};
         ids.push(ex.id);
       });
       days[key] = {label:d.label, weekday:(d.weekday!==undefined?d.weekday:null), warmup:d.warmup||'', cooldown:d.cooldown||'', note:d.note||'', exerciseIds:ids};
     });
     EXTRA_LIBRARY_EXERCISES.forEach(function(ex){
-      if(!library[ex.id]) library[ex.id] = {name:ex.name, type:ex.type, sets:ex.sets||1, target:ex.target, suggested:ex.suggested||''};
+      if(!library[ex.id]) library[ex.id] = {name:ex.name, type:ex.type, sets:ex.sets||1, target:ex.target, suggested:ex.suggested||'', primaryMuscles:ex.primaryMuscles||[], secondaryMuscles:ex.secondaryMuscles||[]};
     });
     return {plan:{order:order, days:days}, library:library};
   }
 
   function defaultData(){
     var seeded = buildPlanFromDefaults();
-    return {plan:seeded.plan, library:seeded.library, sessions:{}, milestones:{pushup:{}, pullup:{}}, prs:[], goals:[], measurements:{unit:'in', defs: DEFAULT_MEASUREMENT_DEFS.slice(), entries:{}}};
+    return {plan:seeded.plan, library:seeded.library, sessions:{}, milestones:{pushup:{}, pullup:{}}, prs:[], goals:[], measurements:{unit:'in', defs: DEFAULT_MEASUREMENT_DEFS.slice(), entries:{}}, muscleGroups: MUSCLE_GROUPS_DEFAULT.slice()};
   }
 
   function getDay(dayKey){ return data.plan.days[dayKey]; }
@@ -509,6 +605,7 @@
       if(!d.sessions) d.sessions = {};
       if(!d.goals) d.goals = LEGACY_GOALS.slice();
       if(!d.measurements) d.measurements = {unit:'in', defs: DEFAULT_MEASUREMENT_DEFS.slice(), entries:{}};
+      if(!d.muscleGroups) d.muscleGroups = MUSCLE_GROUPS_DEFAULT.slice();
       return d;
     }catch(e){
       return defaultData();
@@ -749,6 +846,29 @@
     return html;
   }
 
+  function renderMuscleChips(exId, def){
+    var groups = data.muscleGroups || MUSCLE_GROUPS_DEFAULT;
+    var primary = def.primaryMuscles || [];
+    var secondary = def.secondaryMuscles || [];
+    var html = '';
+    html += '<div class="auth-field"><label>Primary muscles</label><div class="muscle-chip-row">';
+    groups.forEach(function(m){
+      var active = primary.indexOf(m)!==-1;
+      html += '<span class="muscle-chip'+(active?' active-primary':'')+'" onclick="App.toggleMuscleTag(\''+exId+'\',\'primary\',\''+escJs(m)+'\')">'+escAttr(m)+'</span>';
+    });
+    html += '</div></div>';
+    html += '<div class="auth-field"><label>Secondary muscles (optional)</label><div class="muscle-chip-row">';
+    groups.forEach(function(m){
+      var active = secondary.indexOf(m)!==-1;
+      html += '<span class="muscle-chip'+(active?' active-secondary':'')+'" onclick="App.toggleMuscleTag(\''+exId+'\',\'secondary\',\''+escJs(m)+'\')">'+escAttr(m)+'</span>';
+    });
+    html += '</div></div>';
+    html += '<div class="auth-field"><label>Add a custom muscle tag</label><div style="display:flex;gap:6px;">'+
+      '<input type="text" id="newMuscleName-'+exId+'" placeholder="e.g. Neck" style="flex:1;">'+
+      '<button class="icon-btn" onclick="App.addCustomMuscleGroup(\''+exId+'\')">Add</button></div></div>';
+    return html;
+  }
+
   function renderExerciseEditForm(exId, def){
     var html = '<div class="plan-ex-edit-form">';
     html += '<div class="auth-field"><label>Name</label><input type="text" id="editExName" value="'+escAttr(def.name)+'" onchange="App.updateExerciseField(\''+exId+'\',\'name\',this.value)"></div>';
@@ -756,6 +876,7 @@
     html += '<div class="auth-field"><label>Sets</label><input type="number" id="editExSets" value="'+(def.sets||3)+'" onchange="App.updateExerciseField(\''+exId+'\',\'sets\',this.value)"></div>';
     html += '<div class="auth-field"><label>Target (reps/duration)</label><input type="text" id="editExTarget" value="'+escAttr(def.target)+'" onchange="App.updateExerciseField(\''+exId+'\',\'target\',this.value)"></div>';
     html += '<div class="auth-field"><label>Suggested / notes</label><input type="text" id="editExSuggested" value="'+escAttr(def.suggested||'')+'" onchange="App.updateExerciseField(\''+exId+'\',\'suggested\',this.value)"></div>';
+    html += renderMuscleChips(exId, def);
     html += '<button class="done-btn" onclick="App.cancelEditExercise()">Done</button>';
     html += '<div class="plan-hint">Editing here updates this exercise everywhere it appears on your plan — its history and PRs stay linked to it. Changes are staged until you hit "Save Plan Changes" below.</div>';
     html += '</div>';
@@ -1014,6 +1135,7 @@
     var html = '<div class="ham-menu">';
     html += '<div class="ham-item" onclick="App.setViewFromMenu(\'calendar\')">📅 Calendar</div>';
     html += '<div class="ham-item" onclick="App.setViewFromMenu(\'measurements\')">📏 Measurements</div>';
+    html += '<div class="ham-item" onclick="App.setViewFromMenu(\'muscles\')">💪 Muscle coverage</div>';
     html += '<div class="ham-item" onclick="App.setViewFromMenu(\'export\')">⬇️ Export data</div>';
     html += '</div>';
     return html;
@@ -1230,8 +1352,9 @@
       if(/^WARMUP\s*:/i.test(line)){ currentDay.warmup = line.replace(/^WARMUP\s*:/i,'').trim(); return; }
       if(/^COOLDOWN\s*:/i.test(line)){ currentDay.cooldown = line.replace(/^COOLDOWN\s*:/i,'').trim(); return; }
       if(/^NOTE\s*:/i.test(line)){ currentDay.note = line.replace(/^NOTE\s*:/i,'').trim(); return; }
-      if(line.charAt(0)==='-'){
+      if(line.charAt(0)==='-' || line.charAt(0)==='*'){
         var body = line.substring(1).trim();
+        if(!body) return; // empty bullet line (e.g. trailing "* ") — ignore rather than error
         var parts = body.split('|').map(function(p){ return p.trim(); });
         if(parts.length < 2 || !parts[0]){
           errors.push('Line '+lineNo+': expected "- Name | type | 3x10 | notes" — got "'+line+'"');
@@ -1279,7 +1402,7 @@
           if(pe.suggested) planDraft.library[exId].suggested = pe.suggested;
         } else {
           exId = genId('ex');
-          planDraft.library[exId] = {name:pe.name, type:pe.type, sets:pe.sets, target:pe.target, suggested:pe.suggested};
+          planDraft.library[exId] = {name:pe.name, type:pe.type, sets:pe.sets, target:pe.target, suggested:pe.suggested, primaryMuscles:[], secondaryMuscles:[]};
         }
         exerciseIds.push(exId);
       });
@@ -1298,6 +1421,81 @@
     planDirty = true;
   }
 
+  function computeMuscleCoverage(){
+    var groups = data.muscleGroups || MUSCLE_GROUPS_DEFAULT;
+    var strength = {};
+    var flexCovered = {};
+    groups.forEach(function(m){ strength[m] = 0; flexCovered[m] = false; });
+
+    data.plan.order.forEach(function(dk){
+      var day = data.plan.days[dk];
+      day.exerciseIds.forEach(function(exId){
+        var def = data.library[exId];
+        if(!def) return;
+        var pri = def.primaryMuscles || [];
+        var sec = def.secondaryMuscles || [];
+        if(def.type === 'check'){
+          pri.forEach(function(m){ if(strength.hasOwnProperty(m)) flexCovered[m] = true; });
+          return;
+        }
+        var setCount = def.sets || 0;
+        pri.forEach(function(m){ if(strength.hasOwnProperty(m)) strength[m] += setCount; });
+        sec.forEach(function(m){ if(strength.hasOwnProperty(m)) strength[m] += setCount * 0.5; });
+      });
+    });
+    return {strength: strength, flexCovered: flexCovered, groups: groups};
+  }
+
+  function renderMuscleCoverageView(){
+    var cov = computeMuscleCoverage();
+    var untaggedCount = 0;
+    Object.keys(data.library).forEach(function(id){
+      var def = data.library[id];
+      if((!def.primaryMuscles || !def.primaryMuscles.length) && (!def.secondaryMuscles || !def.secondaryMuscles.length)) untaggedCount++;
+    });
+
+    var html = '';
+    html += '<div class="info-card">This mirrors where your <b>current plan\'s</b> weekly sets go — it\'s not a target to equalize. Muscles need different amounts of direct work by nature, and a lot of muscles get real work indirectly from compound lifts even with zero dedicated exercises (secondary tags count at half weight here). Small stabilizers sitting lower than big prime movers is normal, not a gap.</div>';
+
+    if(untaggedCount > 0){
+      html += '<div class="info-card"><b>'+untaggedCount+'</b> exercise'+(untaggedCount===1?'':'s')+' in your library '+(untaggedCount===1?"isn't":"aren't")+' tagged yet, so '+(untaggedCount===1?"it isn't":"they aren't")+' counted below.</div>';
+      html += '<button class="save-btn" onclick="App.autoTagKnownExercises()" style="margin-bottom:16px;">Auto-tag known exercises</button>';
+    }
+
+    html += '<div class="milestone-block"><div class="milestone-title">Strength volume by muscle</div><div class="milestone-sub">Weekly sets programmed — primary exercises count full, secondary count half.</div>';
+    var maxVal = 0;
+    cov.groups.forEach(function(m){ if(cov.strength[m] > maxVal) maxVal = cov.strength[m]; });
+    if(maxVal === 0){
+      html += '<div class="empty-state">No tagged exercises yet — tag some in the Plan tab or use auto-tag above.</div>';
+    } else {
+      cov.groups.slice().sort(function(a,b){ return a.localeCompare(b); }).forEach(function(m){
+        var v = cov.strength[m];
+        var pct = maxVal>0 ? Math.round((v/maxVal)*100) : 0;
+        var vLabel = (v % 1 === 0) ? v : v.toFixed(1);
+        html += '<div class="coverage-row"><div class="coverage-row-head"><span>'+escAttr(m)+'</span><b'+(v===0?' class="coverage-empty-tag"':'')+'>'+vLabel+' set'+(v===1?'':'s')+'</b></div>';
+        html += '<div class="coverage-track"><div class="coverage-fill" style="width:'+pct+'%;'+(v===0?'background:transparent;':'')+'"></div></div></div>';
+      });
+    }
+    html += '</div>';
+
+    html += '<div class="milestone-block"><div class="milestone-title">Flexibility / mobility coverage</div><div class="milestone-sub">Whether at least one stretch or mobility exercise in your plan touches each area.</div>';
+    var anyFlex = Object.keys(data.library).some(function(id){ return data.library[id].type==='check'; });
+    if(!anyFlex){
+      html += '<div class="empty-state">No checklist-type (yoga/mobility) exercises tagged yet.</div>';
+    } else {
+      html += '<div>';
+      cov.groups.slice().sort(function(a,b){ return a.localeCompare(b); }).forEach(function(m){
+        var covered = cov.flexCovered[m];
+        html += '<span class="flex-area-chip'+(covered?' covered':'')+'">'+(covered?'✓ ':'')+escAttr(m)+'</span>';
+      });
+      html += '</div>';
+    }
+    html += '</div>';
+
+    html += '<div class="goals-edit-link" onclick="App.setViewFromMenu(\'plan\')">Tag more exercises in the Plan tab</div>';
+    return html;
+  }
+
   function renderExportView(){
     var html = '';
     html += '<div class="milestone-block"><div class="milestone-title">Export</div><div class="milestone-sub">Share with a trainer, or paste into an AI assistant for feedback as your goals or fitness change.</div>';
@@ -1314,10 +1512,11 @@
     html += '<div class="goals-edit-link" onclick="App.toggleImportFormatHelp()" style="margin-top:6px;">'+(showImportHelp?'Hide format guide':'Show format guide')+'</div>';
     if(showImportHelp){
       html += '<div class="info-card" style="margin-top:8px;">'+
+        'Each of these goes on its <b>own line</b> — DAY:, WEEKDAY:, WARMUP:, COOLDOWN:, and NOTE: can\'t be run together on one line.<br><br>'+
         '<b>DAY:</b> day name (required, starts a new day)<br>'+
         '<b>WEEKDAY:</b> Sun–Sat, or "none" (optional)<br>'+
         '<b>WARMUP: / COOLDOWN: / NOTE:</b> optional text<br>'+
-        '<b>- Name | type | 3x10 | suggested</b> — one line per exercise<br><br>'+
+        '<b>- Name | type | 3x10 | suggested</b> — one line per exercise (a leading "*" also works instead of "-")<br><br>'+
         'Type is one of: weight, time, reps, incline, check. For "check" type, skip the "3x" and just give the target, e.g. "1 min". The "suggested" field can be left blank but keep the trailing "|".<br><br>'+
         'This is exactly the format the text export above uses, so exporting → editing with AI → importing round-trips cleanly.'+
       '</div>';
@@ -1370,7 +1569,7 @@
       '<b>'+(data.prs||[]).length+'</b> PRs'+
     '</div>';
 
-    var secondaryTitles = {calendar:'Calendar', measurements:'Measurements', export:'Export data'};
+    var secondaryTitles = {calendar:'Calendar', measurements:'Measurements', muscles:'Muscle Coverage', export:'Export data'};
     if(secondaryTitles[view]){
       html += '<div class="back-row"><span class="back-link" onclick="App.setView(\'log\')">‹ Back</span><span class="back-title">'+secondaryTitles[view]+'</span></div>';
     } else {
@@ -1386,6 +1585,7 @@
     else if(view==='plan') html += renderPlanEditor();
     else if(view==='calendar') html += renderCalendarView();
     else if(view==='measurements') html += renderMeasurementsView();
+    else if(view==='muscles') html += renderMuscleCoverageView();
     else if(view==='export') html += renderExportView();
 
     document.getElementById('app').innerHTML = html;
@@ -1706,7 +1906,7 @@
       var target = (document.getElementById('newExTarget').value||'').trim() || (type==='check'?'1 min':'10');
       var suggested = (document.getElementById('newExSuggested').value||'').trim();
       var id = genId('ex');
-      planDraft.library[id] = {name:name, type:type, sets:sets, target:target, suggested:suggested};
+      planDraft.library[id] = {name:name, type:type, sets:sets, target:target, suggested:suggested, primaryMuscles:[], secondaryMuscles:[]};
       getDraftDay(dayKey).exerciseIds.push(id);
       planUI.addingExercise=false;
       planDirty = true; render();
@@ -1729,6 +1929,43 @@
       var day = getDraftDay(dayKey);
       day.exerciseIds = day.exerciseIds.filter(function(id){ return id!==exId; });
       planDirty = true; render();
+    },
+    toggleMuscleTag: function(exId, kind, muscleName){
+      ensureDraft();
+      var def = planDraft.library[exId];
+      if(!def) return;
+      var key = kind==='primary' ? 'primaryMuscles' : 'secondaryMuscles';
+      if(!def[key]) def[key] = [];
+      var idx = def[key].indexOf(muscleName);
+      if(idx===-1) def[key].push(muscleName);
+      else def[key].splice(idx,1);
+      planDirty = true;
+      render();
+    },
+    addCustomMuscleGroup: function(exId){
+      var input = document.getElementById('newMuscleName-'+exId);
+      var name = (input && input.value ? input.value : '').trim();
+      if(!name) return;
+      if(!data.muscleGroups) data.muscleGroups = MUSCLE_GROUPS_DEFAULT.slice();
+      var exists = data.muscleGroups.some(function(m){ return m.toLowerCase()===name.toLowerCase(); });
+      if(!exists){
+        data.muscleGroups.push(name);
+        persist();
+      }
+      input.value = '';
+      render();
+    },
+    autoTagKnownExercises: function(){
+      Object.keys(data.library).forEach(function(id){
+        var def = data.library[id];
+        var hasTags = (def.primaryMuscles && def.primaryMuscles.length) || (def.secondaryMuscles && def.secondaryMuscles.length);
+        if(hasTags) return;
+        var lookup = EXERCISE_MUSCLE_LOOKUP[def.name.toLowerCase()];
+        if(!lookup) return;
+        def.primaryMuscles = lookup.p.slice();
+        def.secondaryMuscles = lookup.s.slice();
+      });
+      persist().then(function(){ render(); });
     },
     toggleLibrarySection: function(){
       ensureDraft();
