@@ -4,10 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
 <title>Training Log</title>
-<script>
-  // Batch 2: set the theme before first paint (no flash of the wrong theme).
-  (function(){ try{ var t = localStorage.getItem('tj-theme'); if(!t){ t = (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light'; } document.documentElement.setAttribute('data-theme', t); }catch(e){} })();
-</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
@@ -143,6 +139,12 @@
   .skipped-card{opacity:0.75;}
   .skipped-line{font-size:13px;color:var(--text-muted);margin-top:2px;}
   .skipped-line b{color:var(--bad);}
+  .swap-list{max-height:340px;overflow-y:auto;}
+  .swap-head{position:sticky;top:0;z-index:1;background:var(--panel);display:flex;justify-content:space-between;align-items:center;gap:8px;padding:9px 11px;font-size:12.5px;font-weight:700;border-bottom:1px solid var(--border);}
+  .swap-x{background:var(--panel-2);border:1px solid var(--border);border-radius:7px;width:26px;height:26px;font-size:12px;line-height:1;cursor:pointer;color:var(--text-muted);flex-shrink:0;}
+  .swap-search-row{padding:8px 11px 2px;}
+  .swap-search{width:100%;background:var(--panel-2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;color:var(--text);}
+  .swap-more{width:100%;background:none;border:none;border-top:1px solid var(--border);padding:10px;font-size:12.5px;font-weight:600;color:var(--accent);cursor:pointer;}
 
   .milestone-block{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:15px;margin-bottom:12px;box-shadow:var(--shadow);}
   .milestone-title{font-size:14px;font-weight:700;margin-bottom:2px;}
@@ -265,26 +267,6 @@
     .ex-card{transition:border-color .15s ease;}
   }
 
-  /* Batch 2 (Oct 2026): color identity + dark mode */
-  html[data-theme="dark"]{
-    --bg:#101216; --panel:#1A1D23; --panel-2:#23262E; --border:#33373F;
-    --text:#E9EBEE; --text-muted:#9BA1A9;
-    --gold:#D9A441; --gold-dim:#D9A44122;
-    --accent:#3FA46F; --accent-dim:#3FA46F22;
-    --accent2:#7D92E8; --accent2-dim:#7D92E822;
-    --good:#3FA46F; --bad:#E06C5E; --bad-dim:#E06C5E1F;
-    --shadow:0 1px 2px rgba(0,0,0,0.4), 0 1px 1px rgba(0,0,0,0.3);
-  }
-  html[data-theme="dark"] input[type="date"]{ color-scheme:dark; }
-  html[data-theme="dark"] .setup-warning{ color:#E8BC6A; }
-  .header-actions{display:flex;gap:6px;align-items:center;}
-  .theme-btn{background:none;border:1px solid var(--border);color:var(--text-muted);border-radius:9px;width:34px;height:34px;font-size:15px;cursor:pointer;flex-shrink:0;}
-  .tab .tdot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:5px;vertical-align:1px;}
-  .ex-card{border-left:3px solid var(--day-accent, var(--border));}
-  .muscle-chip{border-color:var(--mc, var(--border));}
-  .muscle-chip.active-primary{background:var(--mc, var(--accent));border-color:var(--mc, var(--accent));color:#fff;}
-  .muscle-chip.active-secondary{background:transparent;border-color:var(--mc, var(--accent));color:var(--mc, var(--accent));}
-  .pr-item .w{background:var(--gold-dim);border-radius:6px;padding:1px 7px;}
 </style>
 </head>
 <body>
@@ -897,8 +879,21 @@
     if(el) el.innerHTML = draftProgressText();
   }
 
-  // Swap candidates: anything in the library not already on today's plan,
-  // exercises sharing a primary muscle with the original listed first.
+  // Muscles for an exercise: its stored tags if it has any, otherwise the
+  // built-in lookup by name. Seeded library entries ship untagged, so reading
+  // only stored tags made almost nothing match.
+  function effectiveMuscles(def){
+    if(!def) return {primary: [], secondary: []};
+    var p = def.primaryMuscles || [], sec = def.secondaryMuscles || [];
+    if(p.length || sec.length) return {primary: p, secondary: sec};
+    var lookup = (typeof EXERCISE_MUSCLE_LOOKUP !== 'undefined') ? EXERCISE_MUSCLE_LOOKUP[(def.name || '').toLowerCase()] : null;
+    if(lookup) return {primary: lookup.p || [], secondary: lookup.s || []};
+    return {primary: [], secondary: []};
+  }
+
+  // Swap candidates in three tiers — same primary muscles, partial overlap
+  // (primary<->secondary), everything else — name-sorted within a tier.
+  // Checklist/mobility exercises only ever swap with their own kind.
   function swapCandidatesFor(exId){
     var day = getDay(activeDay);
     var taken = {};
@@ -908,28 +903,180 @@
       if(e && e.target) taken[e.target] = true;
     });
     var orig = data.library[exId];
-    var origMuscles = (orig && orig.primaryMuscles) || [];
-    var same = [], rest = [];
+    var om = effectiveMuscles(orig);
+    var origIsCheck = !!orig && orig.type === 'check';
+    var same = [], close = [], rest = [];
     Object.keys(data.library).forEach(function(id){
       if(id === exId || taken[id]) return;
       var def = data.library[id];
-      var shared = (def.primaryMuscles || []).some(function(m){ return origMuscles.indexOf(m) >= 0; });
-      (shared ? same : rest).push(id);
+      if((def.type === 'check') !== origIsCheck) return;
+      var m = effectiveMuscles(def);
+      var sharesPrimary = m.primary.some(function(x){ return om.primary.indexOf(x) >= 0; });
+      var overlaps = sharesPrimary ||
+        m.primary.some(function(x){ return om.secondary.indexOf(x) >= 0; }) ||
+        m.secondary.some(function(x){ return om.primary.indexOf(x) >= 0; });
+      if(sharesPrimary) same.push(id);
+      else if(overlaps) close.push(id);
+      else rest.push(id);
     });
-    return {same: same, rest: rest};
+    function byName(a, b){ return (data.library[a].name || a).localeCompare(data.library[b].name || b); }
+    same.sort(byName); close.sort(byName); rest.sort(byName);
+    return {same: same, close: close, rest: rest};
   }
 
-  // ---- Batch 2: color identity + theme ----
-  var DAY_COLORS = ["#364FC7", "#0E7C7B", "#E4572E", "#7C4DBD", "#C2185B", "#2D8A4F", "#D97706"];
-  function hashStr(str){
-    var h = 0;
-    str = String(str || "");
-    for(var i=0;i<str.length;i++){ h = ((h << 5) - h) + str.charCodeAt(i); h |= 0; }
-    return Math.abs(h);
+  function swapGroupHTML(ex, label, ids){
+    if(!ids.length) return '';
+    var html = '<div class="swap-group-label">' + label + '</div>';
+    ids.forEach(function(id){ html += swapItemHTML(ex, id); });
+    return html;
   }
-  function dayColor(dayKey){ return DAY_COLORS[hashStr(dayKey) % DAY_COLORS.length]; }
-  function muscleColor(name){ return DAY_COLORS[hashStr("m:" + name) % DAY_COLORS.length]; }
-  function isDark(){ return document.documentElement.getAttribute("data-theme") === "dark"; }
+
+  // Curated substitutes by primary muscle — the picker's answer when the
+  // library itself has no depth for a muscle (e.g. every Lats exercise in
+  // the library already sits on today's plan). Picking one adds it to the
+  // library and swaps it in for today.
+  var SWAP_SUGGESTIONS = {
+    'Lats': [
+      {name:'Straight-Arm Cable Pulldown', type:'weight', sets:3, target:'12'},
+      {name:'One-Arm DB Row', type:'weight', sets:3, target:'10/side'},
+      {name:'Chest-Supported DB Row', type:'weight', sets:3, target:'10'},
+      {name:'Inverted Row', type:'reps', sets:3, target:'10'},
+      {name:'Band Lat Pulldown', type:'weight', sets:3, target:'12'}
+    ],
+    'Upper Back / Traps': [
+      {name:'Chest-Supported DB Row', type:'weight', sets:3, target:'10'},
+      {name:'DB Shrug', type:'weight', sets:3, target:'12'},
+      {name:'Cable Face Pull', type:'weight', sets:3, target:'15'},
+      {name:'Prone Y Raise', type:'reps', sets:3, target:'12'}
+    ],
+    'Biceps': [
+      {name:'Incline DB Curl', type:'weight', sets:3, target:'10'},
+      {name:'Cable Curl', type:'weight', sets:3, target:'12'},
+      {name:'Concentration Curl', type:'weight', sets:3, target:'10/side'},
+      {name:'Band Curl', type:'weight', sets:3, target:'15'}
+    ],
+    'Chest': [
+      {name:'Cable Fly', type:'weight', sets:3, target:'12'},
+      {name:'Machine Chest Press', type:'weight', sets:3, target:'10'},
+      {name:'Push-Up', type:'reps', sets:3, target:'AMRAP'},
+      {name:'DB Fly', type:'weight', sets:3, target:'12'},
+      {name:'DB Floor Press', type:'weight', sets:3, target:'10'}
+    ],
+    'Triceps': [
+      {name:'Cable Overhead Extension', type:'weight', sets:3, target:'12'},
+      {name:'Bench Dips', type:'reps', sets:3, target:'12'},
+      {name:'Diamond Push-Up', type:'reps', sets:3, target:'AMRAP'},
+      {name:'DB Kickback', type:'weight', sets:3, target:'12'}
+    ],
+    'Shoulders': [
+      {name:'Cable Lateral Raise', type:'weight', sets:3, target:'12'},
+      {name:'Machine Shoulder Press', type:'weight', sets:3, target:'10'},
+      {name:'Pike Push-Up', type:'reps', sets:3, target:'AMRAP'},
+      {name:'Seated DB Press', type:'weight', sets:3, target:'10'}
+    ],
+    'Rear Delts': [
+      {name:'Cable Face Pull', type:'weight', sets:3, target:'15'},
+      {name:'Bent-Over DB Fly', type:'weight', sets:3, target:'12'},
+      {name:'Band Pull-Apart', type:'reps', sets:3, target:'15'}
+    ],
+    'Quads': [
+      {name:'Leg Press', type:'weight', sets:3, target:'10'},
+      {name:'Smith Machine Squat', type:'weight', sets:3, target:'8'},
+      {name:'Walking Lunges', type:'weight', sets:3, target:'10/leg'},
+      {name:'Spanish Squat', type:'reps', sets:3, target:'12'}
+    ],
+    'Hamstrings': [
+      {name:'Seated Leg Curl', type:'weight', sets:3, target:'12'},
+      {name:'DB Romanian Deadlift', type:'weight', sets:3, target:'10'},
+      {name:'Nordic Curl Negatives', type:'reps', sets:3, target:'5'},
+      {name:'Stability Ball Leg Curl', type:'reps', sets:3, target:'12'}
+    ],
+    'Glutes': [
+      {name:'Cable Kickback', type:'weight', sets:3, target:'12'},
+      {name:'Smith Machine Hip Thrust', type:'weight', sets:3, target:'10'},
+      {name:'Frog Pumps', type:'reps', sets:3, target:'20'},
+      {name:'Curtsy Lunge', type:'weight', sets:3, target:'10/leg'}
+    ],
+    'Calves': [
+      {name:'Seated Calf Raise', type:'weight', sets:3, target:'12'},
+      {name:'Leg Press Calf Raise', type:'weight', sets:3, target:'15'},
+      {name:'Single-Leg Calf Raise', type:'reps', sets:3, target:'12/leg'}
+    ],
+    'Core': [
+      {name:'Dead Bug', type:'reps', sets:3, target:'10/side'},
+      {name:'Pallof Press', type:'weight', sets:3, target:'10/side'},
+      {name:'Mountain Climbers', type:'time', sets:3, target:'30s'},
+      {name:'Hollow Body Hold', type:'time', sets:3, target:'20s'}
+    ],
+    'Lower Back': [
+      {name:'Back Extension', type:'weight', sets:3, target:'12'},
+      {name:'Superman', type:'reps', sets:3, target:'12'},
+      {name:'Bird Dog', type:'reps', sets:3, target:'10/side'},
+      {name:'DB Good Morning', type:'weight', sets:3, target:'10'}
+    ],
+    'Hip Abductors': [
+      {name:'Cable Hip Abduction', type:'weight', sets:3, target:'12'},
+      {name:'Fire Hydrants', type:'reps', sets:3, target:'12/side'}
+    ],
+    'Hip Flexors': [
+      {name:'Standing Cable Hip Flexion', type:'weight', sets:3, target:'12'},
+      {name:'Banded March', type:'reps', sets:3, target:'12/leg'}
+    ]
+  };
+
+  function swapSuggestionsFor(exId){
+    var orig = data.library[exId];
+    if(!orig || orig.type === 'check') return [];
+    var om = effectiveMuscles(orig);
+    var inLib = {};
+    Object.keys(data.library).forEach(function(id){ inLib[(data.library[id].name || '').toLowerCase()] = true; });
+    var out = [], seen = {};
+    om.primary.forEach(function(m){
+      (SWAP_SUGGESTIONS[m] || []).forEach(function(sg){
+        var key = sg.name.toLowerCase();
+        if(seen[key] || inLib[key]) return;
+        seen[key] = true;
+        out.push({name: sg.name, type: sg.type, sets: sg.sets, target: sg.target, muscle: m});
+      });
+    });
+    return out.slice(0, 6);
+  }
+
+  function swapSuggestionGroupHTML(ex){
+    var list = swapSuggestionsFor(ex.id);
+    if(!list.length) return '';
+    var html = '<div class="swap-group-label">Suggested substitutes · new</div>';
+    list.forEach(function(sg, i){
+      var meta = sg.type + (sg.muscle ? ' · ' + sg.muscle : '') + ' · adds to library';
+      html += "<button type=\"button\" class=\"swap-item\" onclick=\"App.applySuggestion('" + ex.id + "'," + i + ")\"><span>" + escAttr(sg.name) + "</span><span class=\"swap-meta\">" + escAttr(meta) + "</span></button>";
+    });
+    return html;
+  }
+
+  // Shared tail of Swap / Suggested-substitute: point the draft entry at the
+  // target exercise, prefilling from the target's own last session.
+  function completeSwap(exId, targetId){
+    var entry = draftEntry(exId);
+    if(!entry) return;
+    if(!entry.preSwap) entry.preSwap = {target: entry.target, sets: cloneSets(entry.sets), notes: entry.notes, engaged: entry.engaged, fromLast: entry.fromLast};
+    entry.target = targetId;
+    entry.notes = '';
+    var t = exObj(targetId);
+    var lp = t ? lastPerformed(targetId, activeDate, activeDay) : null;
+    if(lp && lp.entry.sets && lp.entry.sets.length){
+      entry.sets = cloneSets(lp.entry.sets);
+      entry.fromLast = true;
+    } else {
+      entry.sets = [];
+      var n = Math.max(1, (t && t.sets) || 1);
+      for(var i=0;i<n;i++) entry.sets.push(blankSetFor(t));
+      entry.fromLast = false;
+    }
+    entry.engaged = false;
+    entry.swapOpen = false;
+    persistLogDraft();
+    render();
+  }
 
   function setRowHTML(ex, idx, prefill){
     var num = '<span class="set-num">'+(idx+1)+'</span>';
@@ -976,7 +1123,8 @@
 
   function swapItemHTML(ex, candId){
     var def = data.library[candId];
-    var meta = def.type + ((def.primaryMuscles && def.primaryMuscles.length) ? " · " + def.primaryMuscles.join(", ") : "");
+    var m = effectiveMuscles(def);
+    var meta = def.type + (m.primary.length ? " · " + m.primary.join(", ") : "");
     return "<button type=\"button\" class=\"swap-item\" onclick=\"App.applySwap('" + ex.id + "','" + candId + "')\"><span>" + escAttr(def.name) + "</span><span class=\"swap-meta\">" + escAttr(meta) + "</span></button>";
   }
 
@@ -1000,17 +1148,16 @@
     if(entry.swapOpen){
       var cand = swapCandidatesFor(ex.id);
       html += "<div class=\"swap-list\">";
-      if(cand.same.length){
-        html += "<div class=\"swap-group-label\">Same muscles</div>";
-        cand.same.forEach(function(id){ html += swapItemHTML(ex, id); });
-      }
-      if(cand.rest.length){
-        html += "<div class=\"swap-group-label\">Everything else</div>";
-        cand.rest.forEach(function(id){ html += swapItemHTML(ex, id); });
-      }
-      if(!cand.same.length && !cand.rest.length) html += "<div class=\"swap-item\">No other exercises in your library yet</div>";
+      html += "<div class=\"swap-head\"><span>Swap " + escAttr(target.name) + " — today only</span><button type=\"button\" class=\"swap-x\" onclick=\"App.cancelSwap('" + ex.id + "')\" aria-label=\"Cancel swap\">✕</button></div>";
+      html += "<div class=\"swap-search-row\"><input type=\"text\" class=\"swap-search\" placeholder=\"Search exercises…\" oninput=\"App.filterSwap(this)\"></div>";
+      html += swapGroupHTML(ex, "Same muscles", cand.same);
+      html += swapSuggestionGroupHTML(ex);
+      html += swapGroupHTML(ex, "Also works", cand.close);
+      var restIds = entry.showAllSwap ? cand.rest : cand.rest.slice(0, 8);
+      html += swapGroupHTML(ex, "Everything else", restIds);
+      if(!entry.showAllSwap && cand.rest.length > 8) html += "<button type=\"button\" class=\"swap-more\" onclick=\"App.swapShowAll('" + ex.id + "')\">Show all " + cand.rest.length + " others</button>";
+      if(!cand.same.length && !cand.close.length && !cand.rest.length) html += "<div class=\"swap-item\">No other exercises in your library yet</div>";
       html += "</div>";
-      html += "<div class=\"ex-actions\"><button type=\"button\" class=\"mini-btn\" onclick=\"App.cancelSwap('" + ex.id + "')\">Cancel swap</button></div>";
     }
     return html;
   }
@@ -1082,7 +1229,7 @@
     html += '<div class="tabs">';
     data.plan.order.forEach(function(d){
       var dd = getDay(d);
-      html += '<div class="tab'+(d===activeDay?' active':'')+'" onclick="App.setDay(\''+d+'\')"><span class="d"><span class="tdot" style="background:'+dayColor(d)+'"></span>'+shortTabCode(dd)+'</span><span class="s">'+escAttr(dd.label)+'</span></div>';
+      html += '<div class="tab'+(d===activeDay?' active':'')+'" onclick="App.setDay(\''+d+'\')"><span class="d">'+shortTabCode(dd)+'</span><span class="s">'+escAttr(dd.label)+'</span></div>';
     });
     html += '</div>';
 
@@ -1105,8 +1252,7 @@
       '<button class="backup-btn" onclick="App.showBackup()">Show as text (backup)</button>'+
       '<div class="toast" id="toast"></div><div id="backupBox"></div></div>';
 
-    var dc = dayColor(activeDay);
-    return '<div style="--accent:' + dc + ';--accent-dim:' + dc + '14;--day-accent:' + dc + '">' + html + '</div>';
+    return html;
   }
 
   function renderMilestones(){
@@ -1155,13 +1301,13 @@
     html += '<div class="auth-field"><label>Primary muscles</label><div class="muscle-chip-row">';
     groups.forEach(function(m){
       var active = primary.indexOf(m)!==-1;
-      html += '<span class="muscle-chip'+(active?' active-primary':'')+'" style="--mc:'+muscleColor(m)+'" onclick="App.toggleMuscleTag(\''+exId+'\',\'primary\',\''+escJs(m)+'\')">'+escAttr(m)+'</span>';
+      html += '<span class="muscle-chip'+(active?' active-primary':'')+'" onclick="App.toggleMuscleTag(\''+exId+'\',\'primary\',\''+escJs(m)+'\')">'+escAttr(m)+'</span>';
     });
     html += '</div></div>';
     html += '<div class="auth-field"><label>Secondary muscles (optional)</label><div class="muscle-chip-row">';
     groups.forEach(function(m){
       var active = secondary.indexOf(m)!==-1;
-      html += '<span class="muscle-chip'+(active?' active-secondary':'')+'" style="--mc:'+muscleColor(m)+'" onclick="App.toggleMuscleTag(\''+exId+'\',\'secondary\',\''+escJs(m)+'\')">'+escAttr(m)+'</span>';
+      html += '<span class="muscle-chip'+(active?' active-secondary':'')+'" onclick="App.toggleMuscleTag(\''+exId+'\',\'secondary\',\''+escJs(m)+'\')">'+escAttr(m)+'</span>';
     });
     html += '</div></div>';
     html += '<div class="auth-field"><label>Add a custom muscle tag</label><div style="display:flex;gap:6px;">'+
@@ -1330,7 +1476,7 @@
     planDraft.plan.order.forEach(function(dayKey, idx){
       var day = getDraftDay(dayKey);
       var expanded = planUI.expandedDay === dayKey;
-      html += '<div class="plan-day-card" style="border-left:3px solid '+dayColor(dayKey)+'">';
+      html += '<div class="plan-day-card">';
       html += '<div class="plan-day-head">';
       html += '<div class="plan-day-title">'+escAttr(day.label)+'<span class="plan-day-count">'+day.exerciseIds.length+' exercises</span></div>';
       html += '<div class="plan-day-actions">';
@@ -1774,7 +1920,7 @@
         var pct = maxVal>0 ? Math.round((v/maxVal)*100) : 0;
         var vLabel = (v % 1 === 0) ? v : v.toFixed(1);
         html += '<div class="coverage-row"><div class="coverage-row-head"><span>'+escAttr(m)+'</span><b'+(v===0?' class="coverage-empty-tag"':'')+'>'+vLabel+' set'+(v===1?'':'s')+'</b></div>';
-        html += '<div class="coverage-track"><div class="coverage-fill" style="width:'+pct+'%;'+(v===0?'background:transparent;':'background:'+muscleColor(m)+';')+'"></div></div></div>';
+        html += '<div class="coverage-track"><div class="coverage-fill" style="width:'+pct+'%;'+(v===0?'background:transparent;':'')+'"></div></div></div>';
       });
     }
     html += '</div>';
@@ -1858,7 +2004,7 @@
     var thisWeek = Object.values(data.sessions).filter(function(s){ return s.date >= weekStartISO; }).length;
 
     var html = '';
-    html += '<div class="header-row"><div class="app-title">Training Log</div><div class="header-actions"><button class="theme-btn" onclick="App.toggleTheme()" aria-label="Toggle dark mode">' + (isDark() ? '☀️' : '🌙') + '</button><button class="hamburger-btn" onclick="App.toggleMenu()" aria-label="Menu">☰</button></div></div>';
+    html += '<div class="header-row"><div class="app-title">Training Log</div><button class="hamburger-btn" onclick="App.toggleMenu()" aria-label="Menu">☰</button></div></div>';
     html += '<div class="account-line">'+currentUser.email+' · <a onclick="App.logout()">Sign out</a></div>';
     if(menuOpen) html += renderHamburgerMenu();
 
@@ -2024,28 +2170,41 @@
       if(entry) entry.swapOpen = false;
       render();
     },
+    swapShowAll: function(exId){
+      var entry = draftEntry(exId);
+      if(entry) entry.showAllSwap = true;
+      render();
+    },
+    filterSwap: function(input){
+      var list = input.closest ? input.closest('.swap-list') : null;
+      if(!list) return;
+      var q = (input.value || '').toLowerCase();
+      list.querySelectorAll('.swap-item').forEach(function(it){
+        it.style.display = it.textContent.toLowerCase().indexOf(q) >= 0 ? '' : 'none';
+      });
+      list.querySelectorAll('.swap-group-label').forEach(function(lb){
+        var n = lb.nextElementSibling, any = false;
+        while(n && !n.classList.contains('swap-group-label') && !n.classList.contains('swap-more')){
+          if(n.classList.contains('swap-item') && n.style.display !== 'none') any = true;
+          n = n.nextElementSibling;
+        }
+        lb.style.display = any ? '' : 'none';
+      });
+    },
     applySwap: function(exId, candId){
+      syncCardToDraft(exId, false);
+      completeSwap(exId, candId);
+    },
+    applySuggestion: function(exId, idx){
       syncCardToDraft(exId, false);
       var entry = draftEntry(exId);
       if(!entry) return;
-      if(!entry.preSwap) entry.preSwap = {target: entry.target, sets: cloneSets(entry.sets), notes: entry.notes, engaged: entry.engaged, fromLast: entry.fromLast};
-      entry.target = candId;
-      entry.notes = '';
-      var t = exObj(candId);
-      var lp = t ? lastPerformed(candId, activeDate, activeDay) : null;
-      if(lp && lp.entry.sets && lp.entry.sets.length){
-        entry.sets = cloneSets(lp.entry.sets);
-        entry.fromLast = true;
-      } else {
-        entry.sets = [];
-        var n = Math.max(1, (t && t.sets) || 1);
-        for(var i=0;i<n;i++) entry.sets.push(blankSetFor(t));
-        entry.fromLast = false;
-      }
-      entry.engaged = false;
-      entry.swapOpen = false;
-      persistLogDraft();
-      render();
+      var sg = swapSuggestionsFor(exId)[idx];
+      if(!sg) return;
+      var newId = genId('ex');
+      data.library[newId] = {name: sg.name, type: sg.type, sets: sg.sets || 3, target: sg.target || '', suggested: 'Swap substitute', primaryMuscles: sg.muscle ? [sg.muscle] : [], secondaryMuscles: []};
+      persist();
+      completeSwap(exId, newId);
     },
     undoSwap: function(exId){
       var entry = draftEntry(exId);
@@ -2784,12 +2943,6 @@
         day.exerciseIds.splice(ds.currentIndex,0,movedEx);
       }
       planDirty = true;
-      render();
-    },
-    toggleTheme: function(){
-      var next = isDark() ? 'light' : 'dark';
-      document.documentElement.setAttribute('data-theme', next);
-      try{ localStorage.setItem('tj-theme', next); }catch(e){}
       render();
     },
     logout: function(){
