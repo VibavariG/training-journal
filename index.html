@@ -560,6 +560,9 @@
       app = firebase.initializeApp(firebaseConfig);
       auth = firebase.auth();
       db = firebase.firestore();
+      // Batch 5: offline persistence — saves made on gym wifi / bad signal
+      // queue locally and sync when there's a connection again.
+      try{ var pp = db.enablePersistence({synchronizeTabs:true}); if(pp && pp.catch) pp.catch(function(){}); }catch(e){}
     }catch(e){
       sdkLoadError = true;
     }
@@ -2530,22 +2533,33 @@
         recordPRs(target, sets);
       });
 
-      data.sessions[key] = {date: activeDate, day: activeDay, exercises: exercisesOut};
-      clearLogDraft();
+      var hadSession = !!data.sessions[key];
+      var isEmptySave = Object.keys(exercisesOut).length === 0;
+      if(isEmptySave && !hadSession){
+        var t0 = document.getElementById('toast');
+        if(t0){ t0.style.color = 'var(--bad)'; t0.textContent = 'Nothing logged yet — nothing to save.'; }
+        return;
+      }
+      if(isEmptySave){ delete data.sessions[key]; }
+      else { data.sessions[key] = {date: activeDate, day: activeDay, exercises: exercisesOut}; }
 
       persist().then(function(result){
-        render();
         var toast = document.getElementById('toast');
         if(!result.ok){
-          if(toast){ toast.style.color = 'var(--bad)'; toast.textContent = "Couldn't save: " + result.error; }
+          // Batch 5: a failed save loses nothing — the draft (and its
+          // localStorage copy) stays exactly as it was; tap Save again.
+          if(toast){ toast.style.color = 'var(--bad)'; toast.textContent = "Couldn't save: " + result.error + ' — your entries are kept here; tap Save Workout again.'; }
           return;
         }
+        clearLogDraft();
+        render();
+        toast = document.getElementById('toast');
         var parts = [];
         if(nDone) parts.push(nDone + ' done');
         if(nSwap) parts.push(nSwap + ' swapped');
         if(nSkip) parts.push(nSkip + ' skipped');
-        var msg = 'Workout saved' + (parts.length ? ' · ' + parts.join(' · ') : '');
-        if(nDone + nSkip < day.exerciseIds.length) msg += ' — partial counts';
+        var msg = isEmptySave ? 'Workout removed for this day' : ('Workout saved' + (parts.length ? ' · ' + parts.join(' · ') : ''));
+        if(!isEmptySave && nDone + nSkip < day.exerciseIds.length) msg += ' — partial counts';
         if(newPRs.length) msg += ' · ' + newPRs.length + ' new PR' + (newPRs.length>1?'s':'') + ' 🎉';
         if(toast){ toast.style.color = 'var(--good)'; toast.textContent = msg; }
         setTimeout(function(){
