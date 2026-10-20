@@ -4,27 +4,33 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
 <title>Training Log</title>
+<script>
+  // Batch 2: set the theme before first paint (no flash of the wrong theme).
+  (function(){ try{ var t = localStorage.getItem('tj-theme'); if(!t){ t = (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light'; } document.documentElement.setAttribute('data-theme', t); }catch(e){} })();
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#F6F7F5;
+    --bg:#F8F5EF;
     --panel:#FFFFFF;
-    --panel-2:#F1F2EF;
-    --border:#E3E6E1;
-    --text:#20242A;
-    --text-muted:#767C77;
+    --panel-2:#F1EDE4;
+    --border:#E4DDCE;
+    --text:#29271F;
+    --text-muted:#7A7263;
     --gold:#B8863A;
     --gold-dim:#B8863A17;
-    --accent:#2D6A4F;
-    --accent-dim:#2D6A4F14;
-    --accent2:#4A5FA8;
-    --accent2-dim:#4A5FA814;
-    --good:#2D6A4F;
+    --accent:#5A6391;
+    --accent-dim:#5A639114;
+    --accent2:#BC7F4E;
+    --accent2-dim:#BC7F4E14;
+    --good:#5A6391;
     --bad:#B8453A;
     --bad-dim:#B8453A14;
-    --radius:14px;
-    --shadow:0 1px 2px rgba(20,24,20,0.05), 0 1px 1px rgba(20,24,20,0.03);
+    --prefill-bg:#C0855212;
+    --prefill-border:#C0855280;
+    --radius:16px;
+    --shadow:0 1px 2px rgba(41,39,31,0.06), 0 1px 1px rgba(41,39,31,0.04);
   }
   *{box-sizing:border-box;}
   body{margin:0;}
@@ -120,7 +126,7 @@
   /* Batch 1 (Oct 2026): effortless, forgiving logging */
   .progress-line{font-size:12.5px;color:var(--text-muted);margin-bottom:14px;}
   .progress-line b{color:var(--accent);font-weight:700;}
-  .sets-container.prefilled input{background:var(--accent-dim);border-style:dashed;color:var(--text-muted);}
+  .sets-container.prefilled input{background:var(--prefill-bg);border-style:dashed;border-color:var(--prefill-border);color:var(--text-muted);}
   .prefill-hint{font-size:11px;color:var(--accent);margin-bottom:8px;}
   .ex-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;}
   .mini-btn{background:var(--panel-2);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:8px 11px;font-size:12px;font-weight:600;cursor:pointer;}
@@ -233,7 +239,7 @@
   .cal-cell.today{border-color:var(--accent);border-width:1.5px;}
   .cal-cell.logged{border-color:transparent;}
   .cal-cell.logged.light{background:var(--accent-dim);}
-  .cal-cell.logged.mid{background:#2D6A4F38;}
+  .cal-cell.logged.mid{background:#5A639138;}
   .cal-cell.logged.full{background:var(--accent);}
   .cal-cell.logged.full .cal-daynum{color:#fff;font-weight:600;}
   .cal-dot{display:none;}
@@ -267,6 +273,52 @@
     .ex-card{transition:border-color .15s ease;}
   }
 
+
+  /* Batch 2 (Oct 2026): Ink & Clay identity + dark theme, single accent */
+  html[data-theme="dark"]{
+    --bg:#171512; --panel:#211E1A; --panel-2:#2A2721; --border:#3A362E;
+    --text:#EFEAE0; --text-muted:#A39E90;
+    --gold:#D9A441; --gold-dim:#D9A44122;
+    --accent:#8B94BE; --accent-dim:#8B94BE1F;
+    --accent2:#D29A63; --accent2-dim:#D29A631F;
+    --good:#8B94BE; --bad:#E07A63; --bad-dim:#E07A631F;
+    --prefill-bg:#D29A6314; --prefill-border:#D29A6380;
+    --shadow:0 1px 2px rgba(0,0,0,0.4), 0 1px 1px rgba(0,0,0,0.3);
+  }
+  html[data-theme="dark"] input[type="date"]{ color-scheme:dark; }
+  html[data-theme="dark"] .setup-warning{ color:#E8BC6A; }
+  .header-actions{display:flex;gap:6px;align-items:center;}
+  .theme-btn{background:none;border:1px solid var(--border);color:var(--text-muted);border-radius:9px;width:34px;height:34px;font-size:15px;cursor:pointer;flex-shrink:0;}
+  .goals-row{gap:10px;}
+  .goal-item{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:12px 14px;flex:1;box-shadow:var(--shadow);}
+  .goal-a{border-left:3px solid var(--accent);}
+  .goal-b{border-left:3px solid var(--accent2);}
+  .goal-tick{display:none;}
+  .pr-item .w{background:var(--gold-dim);border-radius:6px;padding:1px 7px;}
+
+  /* Batch 3 (Oct 2026): week strip + progress view */
+  .week-strip{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:2px 0 12px;}
+  .week-label{font-size:11px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--text-muted);}
+  .week-dots{display:flex;gap:5px;}
+  .week-dot{width:23px;height:23px;border-radius:50%;border:1.5px solid var(--border);color:var(--text-muted);font-size:9.5px;font-weight:700;display:flex;align-items:center;justify-content:center;background:var(--panel);}
+  .week-dot.filled{background:var(--accent);border-color:var(--accent);color:#fff;}
+  .week-dot.today{border-color:var(--accent2);}
+  .week-dot.filled.today{border-color:var(--accent2);box-shadow:0 0 0 1.5px var(--accent2);}
+  .week-text{font-size:12px;color:var(--text-muted);}
+  .prog-head{margin-bottom:12px;}
+  .prog-name{font-family:'Sora',sans-serif;font-size:19px;font-weight:700;}
+  .prog-sub{font-size:12.5px;color:var(--text-muted);margin-top:3px;}
+  .prog-chart{display:flex;align-items:flex-end;gap:6px;margin:14px 0 4px;overflow-x:auto;padding-top:2px;}
+  .prog-bar-wrap{display:flex;flex-direction:column;align-items:center;gap:3px;min-width:34px;flex:1;}
+  .prog-bar-val{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text);}
+  .prog-bar{width:70%;max-width:26px;background:var(--accent);border-radius:4px 4px 0 0;min-height:6px;}
+  .prog-bar-date{font-size:9px;color:var(--text-muted);white-space:nowrap;}
+  .prog-chart-cap{font-size:11px;color:var(--text-muted);margin-bottom:10px;}
+  .prog-row{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-top:1px solid var(--border);font-size:13px;}
+  .prog-date{color:var(--text-muted);white-space:nowrap;}
+  .prog-sum{font-family:'JetBrains Mono',monospace;font-size:12px;text-align:right;}
+  .prog-note{font-size:12px;color:var(--text-muted);font-style:italic;padding:0 0 8px;}
+  .pr-item.tappable{cursor:pointer;}
 </style>
 </head>
 <body>
@@ -382,7 +434,10 @@
     'wide-legged forward fold': {p:['Hamstrings','Hip Adductors'], s:[]},
     'happy baby pose': {p:['Hip Adductors','Lower Back'], s:[]},
     'knee-to-wall ankle mobility': {p:['Ankle Stabilizers','Shins / Tibialis'], s:[]},
-    '90 90 hip switches': {p:['Hip Flexors','Glutes','Hip Adductors'], s:[]}
+    '90 90 hip switches': {p:['Hip Flexors','Glutes','Hip Adductors'], s:[]},
+    'smith machine hip thrust': {p:['Glutes'], s:['Hamstrings']},
+    'dead bug': {p:['Core'], s:[]},
+    'pallof press': {p:['Core'], s:['Obliques']}
   };
 
   // DEFAULT_EXERCISES + EXTRA_LIBRARY_EXERCISES seed a brand-new user's Plan
@@ -394,7 +449,7 @@
   var DEFAULT_EXERCISES = {
     monday: {
       label:'Back + Biceps', weekday:1,
-      warmup:'Band pull-aparts ×15 · scapular pull-ups ×10 · cat-cow · arm circles',
+      warmup:'Band pull-aparts ×15 · scapular pull-ups ×10 · cat-cow ×6',
       cooldown:'Lat stretch · doorway chest stretch · child\'s pose',
       list:[
         {id:'ex_lat_pulldown', name:'Lat Pulldown', sets:3, target:'10', type:'weight', suggested:'Challenging by rep 8 — pull-up builder'},
@@ -409,7 +464,7 @@
     },
     tuesday: {
       label:'Chest, Triceps & Shoulders', weekday:2,
-      warmup:'Arm circles · band pull-aparts ×15 · light cardio',
+      warmup:'Band pull-aparts ×15 · arm circles ×10 · 1 light warm-up set of chest press',
       cooldown:'Chest doorway stretch · tricep overhead stretch · child\'s pose',
       list:[
         {id:'t_chest_press', name:'DB Chest Press', sets:3, target:'10', type:'weight', suggested:'2×10–12 lb'},
@@ -423,31 +478,32 @@
     },
     wednesday: {
       label:'Shoulders, Lats, Lower Back & Core', weekday:3,
-      warmup:'5 min row/bike · cat-cow · thoracic rotations · shoulder rolls',
+      warmup:'Cat-cow ×6 · thoracic rotations ×6/side · band pull-aparts ×15',
       cooldown:'Child\'s pose · seated spinal twist · lat stretch',
       list:[
         {id:'w_shoulder_press', name:'DB Shoulder Press', sets:3, target:'10', type:'weight', suggested:'2×8–10 lb'},
         {id:'w_arnold_press', name:'Arnold Press', sets:3, target:'10', type:'weight', suggested:'2×8–10 lb'},
         {id:'ex_lat_pulldown', name:'Lat Pulldown', sets:3, target:'10', type:'weight', suggested:'Challenging by rep 8'},
-        {id:'w_hyperextension', name:'Hyperextension', sets:3, target:'12', type:'weight', suggested:'Bodyweight → hold a plate'},
-        {id:'w_incline_crunch', name:'Incline Crunches', sets:3, target:'15', type:'reps', suggested:'Bodyweight'},
+        {id:'w_hyperextension', name:'Hyperextension', sets:3, target:'12', type:'weight', suggested:'Light, neutral spine — stop when your body is straight, don\'t arch back'},
+        {id:'ex_pallof_press', name:'Pallof Press', sets:3, target:'10/side', type:'weight', suggested:'Anti-rotation core — light cable, ribs down, hips still'},
         {id:'ex_reverse_crunch', name:'Reverse Crunch', sets:3, target:'12', type:'reps', suggested:'Lower abs — alternate with Leg Raise'},
         {id:'ex_plank', name:'Plank', sets:3, target:'30–45s', type:'time', suggested:'Bodyweight'}
       ]
     },
     thursday: {
       label:'Legs + Running Stability', weekday:4,
-      warmup:'Hip circles · leg swings · bodyweight squats ×10 · ankle mobility',
-      cooldown:'Quad stretch · hamstring stretch · figure-4 stretch · foam roll IT band/calves',
+      warmup:'Glute bridges ×10 · leg swings ×10/side · bodyweight squats ×10',
+      cooldown:'Figure-4 stretch · hamstring stretch · foam roll calves',
       list:[
         {id:'h_goblet_squat', name:'Goblet Squat', sets:3, target:'10', type:'weight', suggested:'15–20 lb DB'},
+        {id:'ex_hip_thrust', name:'Smith Machine Hip Thrust', sets:3, target:'10', type:'weight', suggested:'Glutes lead lift — squeeze hard at the top'},
         {id:'h_leg_press', name:'Leg Press', sets:3, target:'10', type:'weight', suggested:'Challenging by rep 8'},
         {id:'h_leg_extension', name:'Leg Extension', sets:3, target:'12', type:'weight', suggested:'Moderate'},
         {id:'h_leg_curl', name:'Leg Curl', sets:3, target:'12', type:'weight', suggested:'Moderate'},
         {id:'ex_abductor', name:'Abductor Machine', sets:3, target:'15', type:'weight', suggested:'Hip stability — alternate with Adductor'},
         {id:'h_calf_raise', name:'Standing Calf Raise', sets:3, target:'15', type:'weight', suggested:'Bodyweight or DBs'},
         {id:'ex_single_leg_rdl', name:'Single-Leg RDL', sets:3, target:'8/leg', type:'weight', suggested:'Bodyweight or light DB — alternate with Step-Up'},
-        {id:'ex_decline_situp', name:'Decline Sit-Up', sets:3, target:'15', type:'reps', suggested:'Bodyweight or light plate — alternate with Cable Crunch'}
+        {id:'ex_dead_bug', name:'Dead Bug', sets:3, target:'10/side', type:'reps', suggested:'Anti-extension core — low back pressed into the floor the whole time'}
       ]
     },
     saturday: {
@@ -524,6 +580,8 @@
   var editingGoals = false;
   var menuOpen = false;
   var calendarMonth = null;
+  var progressExId = null;
+  var progressReturn = 'log';
   var measDate = todayISO();
   var showImportHelp = false;
   var dragState = null;
@@ -625,6 +683,46 @@
     if(!planDraft) planDraft = cloneForDraft();
   }
 
+  // Batch 4 (Oct 2026): one-time plan tune-up for accounts seeded earlier —
+  // hip thrust + anti-extension core in, two flexion slots out, hyperextension
+  // guidance, trimmed warm-ups. Every edit is guarded: if Viba already changed
+  // a slot herself, that edit quietly does nothing.
+  function applyPlanPatch202610(d){
+    if(!d || d.planPatch202610 || !d.plan || !d.library) return;
+    d.planPatch202610 = true;
+    var lib = d.library;
+    function ensureDef(def){ if(!lib[def.id]) lib[def.id] = def; }
+    ensureDef({id:'ex_hip_thrust', name:'Smith Machine Hip Thrust', sets:3, target:'10', type:'weight', suggested:'Glutes lead lift — squeeze hard at the top', primaryMuscles:['Glutes'], secondaryMuscles:['Hamstrings']});
+    ensureDef({id:'ex_dead_bug', name:'Dead Bug', sets:3, target:'10/side', type:'reps', suggested:'Anti-extension core — low back pressed into the floor the whole time', primaryMuscles:['Core'], secondaryMuscles:[]});
+    ensureDef({id:'ex_pallof_press', name:'Pallof Press', sets:3, target:'10/side', type:'weight', suggested:'Anti-rotation core — light cable, ribs down, hips still', primaryMuscles:['Core'], secondaryMuscles:['Obliques']});
+    function replaceInDay(dayKey, oldId, newId){
+      var day = d.plan.days[dayKey]; if(!day || !day.exerciseIds) return;
+      var i = day.exerciseIds.indexOf(oldId);
+      if(i >= 0) day.exerciseIds[i] = newId;
+    }
+    replaceInDay('wednesday', 'w_incline_crunch', 'ex_pallof_press');
+    replaceInDay('thursday', 'ex_decline_situp', 'ex_dead_bug');
+    var thu = d.plan.days.thursday;
+    if(thu && thu.exerciseIds && thu.exerciseIds.indexOf('ex_hip_thrust') === -1){
+      var gi = thu.exerciseIds.indexOf('h_goblet_squat');
+      thu.exerciseIds.splice(gi >= 0 ? gi + 1 : 0, 0, 'ex_hip_thrust');
+    }
+    var hyper = lib.w_hyperextension;
+    if(hyper && hyper.suggested === 'Bodyweight \u2192 hold a plate') hyper.suggested = 'Light, neutral spine — stop when your body is straight, don\'t arch back';
+    var warmSwaps = {
+      monday:    ['Band pull-aparts \u00d715 \u00b7 scapular pull-ups \u00d710 \u00b7 cat-cow \u00b7 arm circles', 'Band pull-aparts \u00d715 \u00b7 scapular pull-ups \u00d710 \u00b7 cat-cow \u00d76'],
+      tuesday:   ['Arm circles \u00b7 band pull-aparts \u00d715 \u00b7 light cardio', 'Band pull-aparts \u00d715 \u00b7 arm circles \u00d710 \u00b7 1 light warm-up set of chest press'],
+      wednesday: ['5 min row/bike \u00b7 cat-cow \u00b7 thoracic rotations \u00b7 shoulder rolls', 'Cat-cow \u00d76 \u00b7 thoracic rotations \u00d76/side \u00b7 band pull-aparts \u00d715'],
+      thursday:  ['Hip circles \u00b7 leg swings \u00b7 bodyweight squats \u00d710 \u00b7 ankle mobility', 'Glute bridges \u00d710 \u00b7 leg swings \u00d710/side \u00b7 bodyweight squats \u00d710']
+    };
+    Object.keys(warmSwaps).forEach(function(k){
+      var day = d.plan.days[k];
+      if(day && day.warmup === warmSwaps[k][0]) day.warmup = warmSwaps[k][1];
+    });
+    var thuDay = d.plan.days.thursday;
+    if(thuDay && thuDay.cooldown === 'Quad stretch \u00b7 hamstring stretch \u00b7 figure-4 stretch \u00b7 foam roll IT band/calves') thuDay.cooldown = 'Figure-4 stretch \u00b7 hamstring stretch \u00b7 foam roll calves';
+  }
+
   async function loadData(){
     try{
       var doc = await db.collection('users').doc(currentUser.uid).collection('journal').doc('data').get();
@@ -641,6 +739,7 @@
       if(!d.goals) d.goals = LEGACY_GOALS.slice();
       if(!d.measurements) d.measurements = {unit:'in', defs: DEFAULT_MEASUREMENT_DEFS.slice(), entries:{}};
       if(!d.muscleGroups) d.muscleGroups = MUSCLE_GROUPS_DEFAULT.slice();
+      applyPlanPatch202610(d);
       return d;
     }catch(e){
       return defaultData();
@@ -1078,6 +1177,8 @@
     render();
   }
 
+  function isDark(){ return document.documentElement.getAttribute("data-theme") === "dark"; }
+
   function setRowHTML(ex, idx, prefill){
     var num = '<span class="set-num">'+(idx+1)+'</span>';
     if(ex.type==='weight'){
@@ -1115,7 +1216,7 @@
 
   function skippedCardHTML(ex, entry, target){
     return "<div class=\"ex-card skipped-card\" id=\"card-" + ex.id + "\" data-exid=\"" + ex.id + "\" data-type=\"" + target.type + "\">" +
-      "<div class=\"ex-head\"><span class=\"ex-name\">" + escAttr(target.name) + "</span><span class=\"ex-target\">" + escAttr(target.target || "") + "</span></div>" +
+      "<div class=\"ex-head\"><span class=\"ex-name\" style=\"cursor:pointer\" title=\"View progress\" onclick=\"App.showProgress('" + target.id + "')\">" + escAttr(target.name) + "</span><span class=\"ex-target\">" + escAttr(target.target || "") + "</span></div>" +
       "<div class=\"skipped-line\">Skipped — <b>" + escAttr(entry.reason || "not today") + "</b>. A decision, not a failure.</div>" +
       "<div class=\"ex-actions\"><button type=\"button\" class=\"mini-btn\" onclick=\"App.undoSkip('" + ex.id + "')\">Undo skip</button></div>" +
     "</div>";
@@ -1170,7 +1271,7 @@
     var swapNote = target.id !== ex.id ? "<div class=\"swap-note\">Swapped in for " + escAttr(ex.name) + " — today only, your plan is unchanged.</div>" : "";
 
     return "<div class=\"ex-card\" id=\"card-" + ex.id + "\" data-exid=\"" + ex.id + "\" data-type=\"check\">" +
-      "<div class=\"ex-head\"><span class=\"ex-name\">" + escAttr(target.name) + "</span><span class=\"ex-target\">" + escAttr(target.target) + "</span></div>" +
+      "<div class=\"ex-head\"><span class=\"ex-name\" style=\"cursor:pointer\" title=\"View progress\" onclick=\"App.showProgress('" + target.id + "')\">" + escAttr(target.name) + "</span><span class=\"ex-target\">" + escAttr(target.target) + "</span></div>" +
       "<div class=\"ex-suggested\">" + escAttr(target.suggested) + "</div>" +
       swapNote + refHTML +
       "<label class=\"check-row\"><input type=\"checkbox\" id=\"chk-" + ex.id + "\" " + (entry.done ? "checked" : "") + " onchange=\"App.toggleCheck('" + ex.id + "', this.checked)\"><span>Completed</span></label>" +
@@ -1207,7 +1308,7 @@
     var hint = (entry.fromLast && !entry.engaged) ? "<div class=\"prefill-hint\">Prefilled from your last session — edit what changed, or tap ✓ Same as last time.</div>" : "";
 
     return "<div class=\"ex-card\" id=\"card-" + ex.id + "\" data-exid=\"" + ex.id + "\" data-type=\"" + target.type + "\">" +
-      "<div class=\"ex-head\"><span class=\"ex-name\">" + escAttr(target.name) + "</span><span class=\"ex-target\">" + target.sets + "×" + escAttr(target.target) + "</span></div>" +
+      "<div class=\"ex-head\"><span class=\"ex-name\" style=\"cursor:pointer\" title=\"View progress\" onclick=\"App.showProgress('" + target.id + "')\">" + escAttr(target.name) + "</span><span class=\"ex-target\">" + target.sets + "×" + escAttr(target.target) + "</span></div>" +
       "<div class=\"ex-suggested\">" + escAttr(target.suggested) + "</div>" +
       swapNote + refHTML + hint +
       "<div class=\"sets-container" + (entry.engaged ? "" : " prefilled") + "\" id=\"sets-" + ex.id + "\">" + rowsHTML + "</div>" +
@@ -1232,6 +1333,7 @@
       html += '<div class="tab'+(d===activeDay?' active':'')+'" onclick="App.setDay(\''+d+'\')"><span class="d">'+shortTabCode(dd)+'</span><span class="s">'+escAttr(dd.label)+'</span></div>';
     });
     html += '</div>';
+    html += renderWeekStrip();
 
     html += '<div class="date-row">Logging for <input type="date" id="dateInput" value="'+activeDate+'" onchange="App.setDate(this.value)"></div>';
     html += '<div class="progress-line" id="logProgress">' + draftProgressText() + '</div>';
@@ -1282,7 +1384,7 @@
       html += '<div class="empty-state">No PRs yet — log a heavier set to start your wall.</div>';
     } else {
       prs.forEach(function(p){
-        html += '<div class="pr-item"><span>'+escAttr(p.exName)+'</span><span class="w">'+prDisplayText(p)+' <span class="dt">· '+fmtDate(p.date)+'</span></span></div>';
+        html += '<div class="pr-item tappable" onclick="App.showProgress(\''+p.exId+'\')"><span>'+escAttr(p.exName)+'</span><span class="w">'+prDisplayText(p)+' <span class="dt">· '+fmtDate(p.date)+'</span></span></div>';
       });
     }
     html += '<button class="backup-btn" style="margin-top:10px;" onclick="App.rebuildPRs()">Rebuild PRs from History</button>';
@@ -1290,6 +1392,126 @@
     html += '</div>';
 
     html += '<button class="reset-btn" onclick="App.resetAll()">Clear all journal data</button>';
+    return html;
+  }
+
+  // ---- Batch 3: honest week progress + per-exercise progress view ----
+  function sessionHasEntries(s){ return !!(s && s.exercises && Object.keys(s.exercises).length); }
+  function sessionHasWork(s){
+    if(!sessionHasEntries(s)) return false;
+    return Object.keys(s.exercises).some(function(k){ var e = s.exercises[k]; return e && ((e.sets && e.sets.length) || e.done); });
+  }
+  function isoOf(d){ return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); }
+  function weekStartISO(dateISO){
+    var d = new Date(dateISO + 'T00:00:00');
+    var wd = d.getDay();
+    d.setDate(d.getDate() + ((wd === 0) ? -6 : (1 - wd)));
+    return isoOf(d);
+  }
+  function addDaysISO(dateISO, n){
+    var d = new Date(dateISO + 'T00:00:00');
+    d.setDate(d.getDate() + n);
+    return isoOf(d);
+  }
+  function strengthDays(){
+    return data.plan.order.filter(function(k){
+      var d = data.plan.days[k]; if(!d) return false;
+      return d.exerciseIds.some(function(id){ var o = exObj(id); return o && o.type !== 'check'; });
+    });
+  }
+  function weekProgress(){
+    var start = weekStartISO(todayISO());
+    var byDate = {};
+    Object.keys(data.sessions).forEach(function(key){ var ss = data.sessions[key]; if(ss && ss.date) byDate[ss.date] = ss; });
+    var order = [1,2,3,4,5,6,0];
+    var labels = {0:'Su',1:'M',2:'Tu',3:'W',4:'Th',5:'F',6:'Sa'};
+    var days = strengthDays().map(function(k){ return data.plan.days[k]; }).filter(function(d){ return d && d.weekday !== null && d.weekday !== undefined; });
+    days.sort(function(a,b){ return order.indexOf(a.weekday) - order.indexOf(b.weekday); });
+    var dots = days.map(function(d){
+      var date = addDaysISO(start, (d.weekday + 6) % 7);
+      return {label: labels[d.weekday], date: date, filled: sessionHasWork(byDate[date]), isToday: date === todayISO()};
+    });
+    return {count: dots.filter(function(x){ return x.filled; }).length, target: dots.length, dots: dots, start: start};
+  }
+  function renderWeekStrip(){
+    var wp = weekProgress();
+    if(!wp.target) return '';
+    var html = '<div class="week-strip"><span class="week-label">This week</span><span class="week-dots">';
+    wp.dots.forEach(function(d){ html += '<span class="week-dot'+(d.filled?' filled':'')+(d.isToday?' today':'')+'">'+d.label+'</span>'; });
+    html += '</span><span class="week-text">' + wp.count + ' of ' + wp.target + (wp.count >= wp.target ? ' — week complete 🎉' : ' · partial counts') + '</span></div>';
+    return html;
+  }
+  function sessionBestValue(entry, type){
+    var best = null;
+    (entry.sets || []).forEach(function(st){
+      var v = null;
+      if(type === 'weight') v = st.weight;
+      else if(type === 'time') v = st.seconds;
+      else if(type === 'reps') v = st.reps;
+      else if(type === 'incline') v = (st.height !== null && st.height !== undefined) ? st.height : null;
+      if(v === null || v === undefined) return;
+      if(best === null || (type === 'incline' ? v < best : v > best)) best = v;
+    });
+    return best;
+  }
+  function metricUnit(type){ return type === 'weight' ? ' lb' : (type === 'time' ? 's' : (type === 'incline' ? ' in' : '')); }
+
+  function renderProgress(){
+    var exId = progressExId;
+    var def = exObj(exId);
+    var prName = null;
+    (data.prs || []).forEach(function(p){ if(p.exId === exId && !prName) prName = p.exName; });
+    var name = def ? def.name : (prName || 'Exercise');
+    var type = def ? def.type : null;
+    var hist = allSessionsForExercise(exId).filter(function(h){
+      var e = h.entry || {};
+      return (e.sets && e.sets.length) || e.done !== undefined || e.skipped;
+    });
+    var html = '<div class="prog-head"><div class="prog-name">' + escAttr(name) + '</div>';
+    if(!hist.length){
+      html += '<div class="prog-sub">No sessions logged for this exercise yet.</div></div>';
+      return html;
+    }
+    if(type === 'check'){
+      var doneCount = hist.filter(function(h){ return h.entry.done; }).length;
+      html += '<div class="prog-sub">' + hist.length + ' sessions logged · done ' + doneCount + '×</div></div>';
+      hist.slice(0, 24).forEach(function(h){
+        html += '<div class="prog-row"><span class="prog-date">' + fmtDate(h.date) + '</span><span class="prog-sum">' + (h.entry.skipped ? 'Skipped' + (h.entry.reason ? ' · ' + escAttr(h.entry.reason) : '') : (h.entry.done ? 'Done ✓' : 'Not done')) + '</span></div>';
+      });
+      return html;
+    }
+    var withBest = hist.map(function(h){ return {date: h.date, entry: h.entry, best: sessionBestValue(h.entry, type)}; });
+    var perf = withBest.filter(function(x){ return x.best !== null; });
+    var bestEver = null;
+    perf.forEach(function(x){ if(bestEver === null || (type === 'incline' ? x.best < bestEver : x.best > bestEver)) bestEver = x.best; });
+    html += '<div class="prog-sub">' + hist.length + ' sessions logged' + (bestEver !== null ? ' · best ' + bestEver + metricUnit(type) + (type === 'incline' ? ' (lowest)' : '') : '') + ' · last ' + fmtDate(hist[0].date) + '</div></div>';
+    if(perf.length > 1){
+      var chrono = perf.slice().reverse().slice(-12);
+      var maxV = Math.max.apply(null, chrono.map(function(x){ return x.best; }));
+      var minV = Math.min.apply(null, chrono.map(function(x){ return x.best; }));
+      html += '<div class="prog-chart">';
+      chrono.forEach(function(x){
+        var frac = (type === 'incline') ? (maxV === minV ? 0.7 : 1 - (x.best - minV) / (maxV - minV) * 0.75) : (maxV ? x.best / maxV : 0);
+        var hpx = Math.max(14, Math.round(8 + frac * 52));
+        html += '<div class="prog-bar-wrap"><div class="prog-bar-val">' + x.best + '</div><div class="prog-bar" style="height:' + hpx + 'px"></div><div class="prog-bar-date">' + fmtDate(x.date) + '</div></div>';
+      });
+      html += '</div><div class="prog-chart-cap">Best set per session' + (type === 'incline' ? ' — lower is better' : '') + '</div>';
+    }
+    withBest.slice(0, 24).forEach(function(x){
+      var e = x.entry;
+      var sum;
+      if(e.skipped) sum = 'Skipped' + (e.reason ? ' · ' + escAttr(e.reason) : '');
+      else if(x.best !== null){
+        sum = (e.sets || []).length + ' sets · top ' + x.best + metricUnit(type);
+        if(type === 'weight'){
+          var topSet = null;
+          (e.sets || []).forEach(function(st){ if(st.weight === x.best && !topSet) topSet = st; });
+          if(topSet && topSet.reps) sum += ' × ' + topSet.reps;
+        }
+      } else sum = 'Note only';
+      html += '<div class="prog-row"><span class="prog-date">' + fmtDate(x.date) + '</span><span class="prog-sum">' + sum + '</span></div>';
+      if(e.notes) html += '<div class="prog-note">' + escAttr(e.notes) + '</div>';
+    });
     return html;
   }
 
@@ -1637,7 +1859,7 @@
     }
     html += '</div>';
     html += '<div class="cal-legend"><span class="cal-legend-swatch" style="background:var(--accent-dim);"></span> a little'+
-      '<span class="cal-legend-swatch" style="background:#2D6A4F38;margin-left:8px;"></span> some'+
+      '<span class="cal-legend-swatch" style="background:#5A639138;margin-left:8px;"></span> some'+
       '<span class="cal-legend-swatch" style="background:var(--accent);margin-left:8px;"></span> full session</div>';
     html += '<div class="plan-hint" style="margin-top:12px;">Tap any day to view or log it, whether or not it already has an entry.</div>';
     return html;
@@ -1995,16 +2217,13 @@
       return;
     }
 
-    var sessionCount = Object.keys(data.sessions).length;
-    var now2 = new Date();
-    var wd = now2.getDay(); // 0=Sun..6=Sat
-    var diffToMonday = (wd === 0) ? -6 : (1 - wd);
-    var weekStart = new Date(now2.getFullYear(), now2.getMonth(), now2.getDate() + diffToMonday);
-    var weekStartISO = new Date(weekStart.getTime() - weekStart.getTimezoneOffset()*60000).toISOString().slice(0,10);
-    var thisWeek = Object.values(data.sessions).filter(function(s){ return s.date >= weekStartISO; }).length;
+    var sessionCount = Object.values(data.sessions).filter(sessionHasEntries).length;
+    var wpTop = weekProgress();
+    var thisWeek = wpTop.count;
+    var weekTarget = wpTop.target || data.plan.order.length;
 
     var html = '';
-    html += '<div class="header-row"><div class="app-title">Training Log</div><button class="hamburger-btn" onclick="App.toggleMenu()" aria-label="Menu">☰</button></div></div>';
+    html += '<div class="header-row"><div class="app-title">Training Log</div><div class="header-actions"><button class="theme-btn" onclick="App.toggleTheme()" aria-label="Toggle dark mode">' + (isDark() ? '☀️' : '🌙') + '</button><button class="hamburger-btn" onclick="App.toggleMenu()" aria-label="Menu">☰</button></div></div>';
     html += '<div class="account-line">'+currentUser.email+' · <a onclick="App.logout()">Sign out</a></div>';
     if(menuOpen) html += renderHamburgerMenu();
 
@@ -2012,12 +2231,14 @@
 
     html += '<div class="stat-line">'+
       '<b>'+sessionCount+'</b> logged<span class="dot">·</span>'+
-      '<b>'+thisWeek+'/'+data.plan.order.length+'</b> this week<span class="dot">·</span>'+
+      '<b>'+thisWeek+'/'+weekTarget+'</b> this week<span class="dot">·</span>'+
       '<b>'+(data.prs||[]).length+'</b> PRs'+
     '</div>';
 
     var secondaryTitles = {calendar:'Calendar', measurements:'Measurements', muscles:'Muscle Coverage', export:'Export data'};
-    if(secondaryTitles[view]){
+    if(view==='progress'){
+      html += '<div class="back-row"><span class="back-link" onclick="App.setView(\''+progressReturn+'\')">‹ Back</span><span class="back-title">Progress</span></div>';
+    } else if(secondaryTitles[view]){
       html += '<div class="back-row"><span class="back-link" onclick="App.setView(\'log\')">‹ Back</span><span class="back-title">'+secondaryTitles[view]+'</span></div>';
     } else {
       html += '<div class="view-switch">'+
@@ -2029,6 +2250,7 @@
 
     if(view==='log') html += renderLogView();
     else if(view==='milestones') html += renderMilestones();
+    else if(view==='progress') html += renderProgress();
     else if(view==='plan') html += renderPlanEditor();
     else if(view==='calendar') html += renderCalendarView();
     else if(view==='measurements') html += renderMeasurementsView();
@@ -2943,6 +3165,19 @@
         day.exerciseIds.splice(ds.currentIndex,0,movedEx);
       }
       planDirty = true;
+      render();
+    },
+    showProgress: function(exId){
+      progressExId = exId;
+      if(view !== 'progress') progressReturn = view;
+      view = 'progress';
+      render();
+      try{ window.scrollTo(0, 0); }catch(e){}
+    },
+    toggleTheme: function(){
+      var next = isDark() ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      try{ localStorage.setItem('tj-theme', next); }catch(e){}
       render();
     },
     logout: function(){
